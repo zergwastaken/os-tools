@@ -1,0 +1,14 @@
+{
+  "NATO Alphabet": [
+    { "question": "What is the NATO phonetic for 'A'?", "answer": "Alpha" },
+    { "question": "What is the NATO phonetic for 'B'?", "answer": "Bravo" },
+    { "question": "What is the NATO phonetic for 'C'?", "answer": "Charlie" },
+    { "question": "What is the NATO phonetic for 'D'?", "answer": "Delta" },
+    { "question": "What is the NATO phonetic for 'E'?", "answer": "Echo" }
+  ],
+  "Math Basics": [
+    { "question": "What is 2 + 2?", "answer": "4" },
+    { "question": "What is 5 x 3?", "answer": "15" },
+    { "question": "What is the square root of 9?", "answer": "3" }
+  ]
+}

@@ -4,136 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COMMS UNIT STUFF!</title>
-    <style>
-        body {
-            background: #181c24;
-            color: #f3f3f3;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        h2 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 5.2rem;
-        }
-        label, select, input {
-            font-size: 1.1rem;
-        }
-        #durationInput, #clockInput {
-            margin: 10px 0;
-        }
-        input[type="number"], input[type="time"] {
-            padding: 6px 10px;
-            border-radius: 5px;
-            border: 1px solid #444;
-            background: #23283a;
-            color: #f3f3f3;
-            margin-right: 5px;
-        }
-        select {
-            padding: 6px 10px;
-            border-radius: 5px;
-            border: 1px solid #444;
-            background: #23283a;
-            color: #f3f3f3;
-        }
-        #startTimer {
-            padding: 10px 30px;
-            background: #3a7afe;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        #startTimer:hover {
-            background: #2556b8;
-        }
-        #timerDisplay {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 25px 0 0 0;
-            letter-spacing: 2px;
-            color: #3a7afe;
-            text-shadow: 0 2px 8px #000a;
-        }
-        div {
-            margin-bottom: 8px;
-        }
-        /* Popup styles */
-        #timerPopup {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            animation: none;
-        }
-        #timerPopup.flashing-bg {
-            animation: flash-bg 0.7s infinite alternate;
-        }
-        #popupContent {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .flashing {
-            font-size: 8rem;
-            color: #ff2222;
-            font-weight: bold;
-            text-shadow: 0 0 30px #ff2222, 0 0 10px #fff;
-        }
-        @keyframes flash-bg {
-            from { background: #ff2222; }
-            to { background: #7a0000; }
-        }
-        #popupMsg {
-            color: #fff;
-            font-size: 2rem;
-            margin-top: 10px;
-            text-align: center;
-        }
-        #timerPopup {
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h2>Multi Timer</h2>
-    <form id="newTimerForm" autocomplete="off" style="margin-bottom: 20px;">
-        <input type="text" id="timerName" placeholder="Timer name" maxlength="30" style="width: 140px; margin-right: 10px;">
-        <select id="timerType">
-            <option value="duration">Duration (min:sec)</option>
-            <option value="clock">Clock Time (HH:MM)</option>
-        </select>
-        <span id="durationInput">
-            <input type="number" id="minutes" placeholder="Min" min="0" style="width:55px;"> :
-            <input type="number" id="seconds" placeholder="Sec" min="0" max="59" style="width:55px;">
-        </span>
-        <span id="clockInput" style="display:none;">
-            <input type="time" id="clockTime">
-        </span>
-        <button type="submit" id="addTimer">Add Timer</button>
-    </form>
-    <div id="timersList"></div>
+    <header class="nav-header">
+        <nav>
+            <a href="index.html"><span class="nav-icon">🏠</span> Home</a>
+            <a href="timer.html"><span class="nav-icon">⏲️</span> Timer</a>
+            <a href="flashcard.html"><span class="nav-icon">🃏</span> Flash Cards</a>
+        </nav>
+    </header>
+    <main class="center-container glass-bg">
+        <h1>Multi Timer</h1>
+        <form id="newTimerForm" autocomplete="off" style="margin-bottom: 20px;">
+                    <div class="preset-timers">
+                        <button type="button" class="preset-btn" data-hours="0" data-minutes="30" data-seconds="0">Boat Timer (30 min)</button>
+                        <button type="button" class="preset-btn" data-hours="0" data-minutes="15" data-seconds="0">Heli Timer (15 min)</button>
+                        <button type="button" class="preset-btn" data-hours="4" data-minutes="0" data-seconds="0">Cutter Timer (4 hr)</button>
+                    </div>
+            <div class="timer-form-row">
+                <input type="text" id="timerName" placeholder="Timer name" maxlength="30">
+            </div>
+            <div class="timer-form-row">
+                <select id="timerType">
+                    <option value="duration">Duration (min:sec)</option>
+                    <option value="clock">Clock Time (HH:MM)</option>
+                </select>
+            </div>
+            <span id="durationInput" class="duration-input-group">
+                <div class="num-input-wrap">
+                    <label for="hours" class="num-label">Hours</label>
+                    <input type="number" id="hours" placeholder="Hr" min="0" style="width:55px;" autocomplete="off">
+                    <div class="num-btns-row">
+                        <button type="button" class="num-up" data-target="hours">▲</button>
+                        <button type="button" class="num-down" data-target="hours">▼</button>
+                    </div>
+                </div>
+                :
+                <div class="num-input-wrap">
+                    <label for="minutes" class="num-label">Minutes</label>
+                    <input type="number" id="minutes" placeholder="Min" min="0" max="59" style="width:55px;" autocomplete="off">
+                    <div class="num-btns-row">
+                        <button type="button" class="num-up" data-target="minutes">▲</button>
+                        <button type="button" class="num-down" data-target="minutes">▼</button>
+                    </div>
+                </div>
+                :
+                <div class="num-input-wrap">
+                    <label for="seconds" class="num-label">Seconds</label>
+                    <input type="number" id="seconds" placeholder="Sec" min="0" max="59" style="width:55px;" autocomplete="off">
+                    <div class="num-btns-row">
+                        <button type="button" class="num-up" data-target="seconds">▲</button>
+                        <button type="button" class="num-down" data-target="seconds">▼</button>
+                    </div>
+                </div>
+            </span>
+            <span id="clockInput" style="display:none;">
+                <input type="time" id="clockTime">
+            </span>
+            <div class="timer-form-row">
+                <button type="submit" id="addTimer" class="">Add Timer</button>
+            </div>
+        </form>
+        <div id="zuluSidebar" class="zulu-sidebar">
+            <div class="zulu-title">Local vs Zulu Time</div>
+            <div id="localTime" class="zulu-time"></div>
+            <div id="zuluTime" class="zulu-time"></div>
+            <div id="zuluDiff" class="zulu-diff"></div>
+        </div>
+        <div id="timersList"></div>
+    </main>
     <!-- Flashing popup for timer end -->
     <div id="timerPopup">
         <div id="popupContent">
             <span class="flashing">!</span>
-            <div id="popupMsg">Time is up!<br><span style="font-size:1.1rem;">(Click anywhere to close)</span></div>
+            <div id="popupMsg">Time is up!<br><span style="font-size:1.1rem;">(Click anywhere to restart timer)</span></div>
         </div>
     </div>
     <script>
-        // Multi-timer logic
+                                        // Zulu (UTC) time sidebar logic
+                                        function updateZuluSidebar() {
+                                            const now = new Date();
+                                            const local = now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                                            const zulu = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC'});
+                                            const localHour = now.getHours();
+                                            const zuluHour = now.getUTCHours();
+                                            let diff = localHour - zuluHour;
+                                            let sign = diff > 0 ? '+' : (diff < 0 ? '-' : '±');
+                                            let absDiff = Math.abs(diff);
+                                            // Handle wrap-around (e.g., UTC+10 vs UTC-2)
+                                            if (absDiff > 12) {
+                                                absDiff = 24 - absDiff;
+                                                sign = diff > 0 ? '-' : '+';
+                                            }
+                                            document.getElementById('localTime').textContent = `Local: ${local}`;
+                                            document.getElementById('zuluTime').textContent = `Zulu (UTC): ${zulu}`;
+                                            document.getElementById('zuluDiff').textContent = `Difference: UTC ${sign}${absDiff} hours`;
+                                        }
+                                        if (document.getElementById('zuluSidebar')) {
+                                            updateZuluSidebar();
+                                            setInterval(updateZuluSidebar, 1000);
+                                        }
+                                // Preset timer buttons logic
+                                document.querySelectorAll('.preset-btn').forEach(btn => {
+                                    btn.addEventListener('click', function() {
+                                        const hours = document.getElementById('hours');
+                                        const minutes = document.getElementById('minutes');
+                                        const seconds = document.getElementById('seconds');
+                                        hours.value = this.dataset.hours;
+                                        minutes.value = this.dataset.minutes;
+                                        seconds.value = this.dataset.seconds;
+                                        hours.dispatchEvent(new Event('input', { bubbles: true }));
+                                        minutes.dispatchEvent(new Event('input', { bubbles: true }));
+                                        seconds.dispatchEvent(new Event('input', { bubbles: true }));
+                                    });
+                                });
+                        // Custom up/down buttons for time inputs
+                        document.querySelectorAll('.num-up').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const input = document.getElementById(this.dataset.target);
+                                let max = input.max ? parseInt(input.max) : 9999;
+                                let val = parseInt(input.value) || 0;
+                                if (val < max) input.value = val + 1;
+                                input.dispatchEvent(new Event('input'));
+                            });
+                        });
+                        document.querySelectorAll('.num-down').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const input = document.getElementById(this.dataset.target);
+                                let min = input.min ? parseInt(input.min) : 0;
+                                let val = parseInt(input.value) || 0;
+                                if (val > min) input.value = val - 1;
+                                input.dispatchEvent(new Event('input'));
+                            });
+                        });
+                // Auto-correct minutes and seconds to 59 if user enters higher
+                document.getElementById('hours').addEventListener('input', function() {
+                    if (this.value > 24) this.value = 24;
+                    if (this.value < 0) this.value = 0;
+                });
+                document.getElementById('minutes').addEventListener('input', function() {
+                    if (this.value > 59) this.value = 59;
+                    if (this.value < 0) this.value = 0;
+                });
+                document.getElementById('seconds').addEventListener('input', function() {
+                    if (this.value > 59) this.value = 59;
+                    if (this.value < 0) this.value = 0;
+                });
+        // Multi-timer logic with persistence
         const timerType = document.getElementById('timerType');
         const durationInput = document.getElementById('durationInput');
         const clockInput = document.getElementById('clockInput');
@@ -148,40 +166,43 @@
         function pad(n) {
             return n.toString().padStart(2, '0');
         }
-
-        let lastFinishedTimerIdx = null;
-        function showTimerPopup(name, idx) {
-            popupMsg.innerHTML = `<b>${name}</b><br>Time is up!<br><span style=\"font-size:1.1rem;\">(Click anywhere to close)</span>`;
-            timerPopup.classList.add('flashing-bg');
-            timerPopup.style.display = 'flex';
-            lastFinishedTimerIdx = idx;
-        }
-        function hideTimerPopupAndRestart() {
-            timerPopup.style.display = 'none';
-            timerPopup.classList.remove('flashing-bg');
-            if (lastFinishedTimerIdx !== null && timers[lastFinishedTimerIdx]) {
-                // Reset and restart the timer
-                let timer = timers[lastFinishedTimerIdx];
-                timer.remaining = timer.total;
-                timer.display = pad(Math.floor(timer.remaining/60)) + ':' + pad(timer.remaining%60);
-                timer.running = false;
-                timer.started = false;
-                renderTimers();
-                toggleTimer(lastFinishedTimerIdx);
-            }
-            lastFinishedTimerIdx = null;
-        }
-        timerPopup && timerPopup.addEventListener('click', hideTimerPopupAndRestart);
-
-        timerType.addEventListener('change', function() {
-            if (this.value === 'duration') {
-                durationInput.style.display = '';
-                clockInput.style.display = 'none';
+        function formatTime(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            if (h > 0) {
+                return pad(h) + ':' + pad(m) + ':' + pad(s);
             } else {
-                durationInput.style.display = 'none';
-                clockInput.style.display = '';
+                return pad(m) + ':' + pad(s);
             }
-        });
+        }
+
+        function saveTimers() {
+            // Save all timers to localStorage
+            localStorage.setItem('timers', JSON.stringify(timers.map(t => {
+                // Don't save interval property
+                const {interval, ...rest} = t;
+                return rest;
+            })));
+        }
+
+        function loadTimers() {
+            let saved = localStorage.getItem('timers');
+            if (saved) {
+                try {
+                    timers = JSON.parse(saved);
+                } catch {
+                    timers = [];
+                }
+            }
+        }
+
+        function updateTimerDisplays() {
+            timers.forEach((timer, idx) => {
+                const el = document.getElementById(`timerDisplay${idx}`);
+                if (el) el.textContent = formatTime(timer.remaining);
+            });
+        }
 
         function renderTimers() {
             timersList.innerHTML = '';
@@ -203,11 +224,15 @@
                 name.style.minWidth = '90px';
 
                 const time = document.createElement('span');
-                time.textContent = timer.display;
+                time.textContent = formatTime(timer.remaining);
                 time.style.fontFamily = 'monospace';
                 time.style.fontSize = '2rem';
                 time.style.letterSpacing = '2px';
                 time.id = `timerDisplay${idx}`;
+
+                // Flex spacer to push buttons to the right
+                const spacer = document.createElement('div');
+                spacer.style.flex = '1';
 
                 const startBtn = document.createElement('button');
                 startBtn.textContent = timer.running ? 'Pause' : (timer.started ? 'Resume' : 'Start');
@@ -233,22 +258,52 @@
 
                 div.appendChild(name);
                 div.appendChild(time);
+                div.appendChild(spacer);
                 div.appendChild(startBtn);
                 div.appendChild(removeBtn);
                 timersList.appendChild(div);
             });
         }
 
-        function updateTimerDisplays() {
-            timers.forEach((timer, idx) => {
-                const el = document.getElementById(`timerDisplay${idx}`);
-                if (el) el.textContent = timer.display;
-            });
+        let lastFinishedTimerIdx = null;
+        function showTimerPopup(name, idx) {
+            popupMsg.innerHTML = `<b>${name}</b><br>Time is up!<br><span style=\"font-size:1.1rem;\">(Click anywhere to close)</span>`;
+            timerPopup.classList.add('flashing-bg');
+            timerPopup.style.display = 'flex';
+            lastFinishedTimerIdx = idx;
         }
+        function hideTimerPopupAndRestart() {
+            timerPopup.style.display = 'none';
+            timerPopup.classList.remove('flashing-bg');
+            if (lastFinishedTimerIdx !== null && timers[lastFinishedTimerIdx]) {
+                // Reset and restart the timer
+                let timer = timers[lastFinishedTimerIdx];
+                timer.remaining = timer.total;
+                timer.display = pad(Math.floor(timer.remaining/60)) + ':' + pad(timer.remaining%60);
+                timer.running = false;
+                timer.started = false;
+                saveTimers();
+                renderTimers();
+                toggleTimer(lastFinishedTimerIdx);
+            }
+            lastFinishedTimerIdx = null;
+        }
+        timerPopup && timerPopup.addEventListener('click', hideTimerPopupAndRestart);
+
+        timerType.addEventListener('change', function() {
+            if (this.value === 'duration') {
+                durationInput.style.display = '';
+                clockInput.style.display = 'none';
+            } else {
+                durationInput.style.display = 'none';
+                clockInput.style.display = '';
+            }
+        });
 
         function removeTimer(idx) {
             if (timers[idx].interval) clearInterval(timers[idx].interval);
             timers.splice(idx, 1);
+            saveTimers();
             renderTimers();
         }
 
@@ -256,23 +311,37 @@
             const timer = timers[idx];
             if (timer.running) {
                 clearInterval(timer.interval);
+                // Save the time when paused
                 timer.running = false;
+                timer.lastPaused = Date.now();
+                saveTimers();
             } else {
-                if (!timer.started) timer.remaining = timer.total;
+                // If starting for the first time or after pause, set the end time
+                if (!timer.started) {
+                    timer.remaining = timer.total;
+                    timer.endTime = Date.now() + timer.remaining * 1000;
+                } else if (timer.lastPaused) {
+                    // Adjust endTime based on how much time was left
+                    timer.endTime = Date.now() + timer.remaining * 1000;
+                }
                 timer.started = true;
                 timer.running = true;
                 timer.interval = setInterval(() => {
-                    timer.remaining--;
+                    // Calculate remaining time based on endTime
+                    timer.remaining = Math.max(0, Math.round((timer.endTime - Date.now()) / 1000));
                     timer.display = pad(Math.floor(timer.remaining/60)) + ':' + pad(timer.remaining%60);
                     updateTimerDisplays();
                     if (timer.remaining <= 0) {
                         clearInterval(timer.interval);
                         timer.display = '00:00';
                         timer.running = false;
+                        timer.started = false;
+                        saveTimers();
                         showTimerPopup(timer.name || 'Timer', idx);
                         updateTimerDisplays();
                     }
                 }, 1000);
+                saveTimers();
             }
             renderTimers();
         }
@@ -282,9 +351,10 @@
             let totalSeconds;
             let name = timerNameInput.value.trim() || 'Timer';
             if (timerType.value === 'duration') {
+                const hr = parseInt(document.getElementById('hours').value) || 0;
                 const min = parseInt(document.getElementById('minutes').value) || 0;
                 const sec = parseInt(document.getElementById('seconds').value) || 0;
-                totalSeconds = min * 60 + sec;
+                totalSeconds = hr * 3600 + min * 60 + sec;
             } else {
                 const now = new Date();
                 const [h, m] = document.getElementById('clockTime').value.split(':') || [0,0];
@@ -300,21 +370,44 @@
                 name,
                 total: totalSeconds,
                 remaining: totalSeconds,
-                display: pad(Math.floor(totalSeconds/60)) + ':' + pad(totalSeconds%60),
                 running: false,
                 started: false,
                 interval: null
             });
+            saveTimers();
             renderTimers();
             // Automatically start the new timer
             toggleTimer(timers.length - 1);
             timerNameInput.value = '';
+            document.getElementById('hours').value = '';
             document.getElementById('minutes').value = '';
             document.getElementById('seconds').value = '';
             document.getElementById('clockTime').value = '';
         });
 
-        // Initial render
+        // On page load, restore timers and recalculate remaining time
+        loadTimers();
+        // Restore intervals for running timers
+        timers.forEach((timer, idx) => {
+            if (timer.running && timer.endTime) {
+                // Recalculate remaining time
+                timer.remaining = Math.max(0, Math.round((timer.endTime - Date.now()) / 1000));
+                timer.interval = setInterval(() => {
+                    timer.remaining = Math.max(0, Math.round((timer.endTime - Date.now()) / 1000));
+                    updateTimerDisplays();
+                    if (timer.remaining <= 0) {
+                        clearInterval(timer.interval);
+                        timer.running = false;
+                        timer.started = false;
+                        saveTimers();
+                        showTimerPopup(timer.name || 'Timer', idx);
+                        updateTimerDisplays();
+                    }
+                }, 1000);
+            }
+        });
+        // Always update display on load
+        updateTimerDisplays();
         renderTimers();
     </script>
 </body>
