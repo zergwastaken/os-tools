@@ -1,3 +1,61 @@
+                /* Global Timer Bar Styles */
+                #global-timer-bar {
+                    position: fixed;
+                    left: 0;
+                    right: 0;
+                    bottom: 60px;
+                    z-index: 1200;
+                    background: rgba(35, 40, 58, 0.92);
+                    color: #b3c6ff;
+                    font-size: 1.18rem;
+                    font-weight: 600;
+                    box-shadow: 0 -2px 12px #0005;
+                    padding: 12px 0 10px 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 28px;
+                    border-top: 2px solid #3a7afe44;
+                    border-radius: 18px 18px 0 0;
+                    pointer-events: auto;
+                }
+                #global-timer-bar .timer-bar-timer {
+                    background: linear-gradient(90deg, #3a7afe 60%, #1e2a4a 100%);
+                    color: #fff;
+                    border-radius: 8px;
+                    padding: 6px 18px;
+                    margin: 0 6px;
+                    font-size: 1.08rem;
+                    box-shadow: 0 2px 8px 0 rgba(58,122,254,0.10);
+                    display: inline-block;
+                }
+                #global-timer-bar .timer-bar-time {
+                    font-family: monospace;
+                    font-size: 1.18rem;
+                    margin-left: 6px;
+                }
+                #global-timer-bar .timer-bar-sep {
+                    color: #7bb6ff;
+                    margin: 0 10px;
+                    font-size: 1.2rem;
+                }
+                #global-timer-bar .timer-bar-empty {
+                    color: #b3c6ff;
+                    opacity: 0.7;
+                    font-size: 1.08rem;
+                    font-style: italic;
+                }
+                @media (max-width: 600px) {
+                    #global-timer-bar {
+                        font-size: 0.98rem;
+                        padding: 8px 0 8px 0;
+                        gap: 10px;
+                    }
+                    #global-timer-bar .timer-bar-timer {
+                        padding: 4px 8px;
+                        font-size: 0.98rem;
+                    }
+                }
                 .zulu-sidebar {
                     margin: 24px auto 0 auto;
                     background: rgba(35,40,58,0.85);
