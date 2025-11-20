@@ -1,23 +1,51 @@
-                /* Global Timer Bar Styles */
+/* Global Timer Bar Styles */
                 #global-timer-bar {
                     position: fixed;
+                    top: 50%;
                     left: 0;
-                    right: 0;
-                    bottom: 60px;
+                    transform: translateY(-50%);
                     z-index: 1200;
                     background: rgba(35, 40, 58, 0.92);
                     color: #b3c6ff;
                     font-size: 1.18rem;
                     font-weight: 600;
-                    box-shadow: 0 -2px 12px #0005;
-                    padding: 12px 0 10px 0;
+                    box-shadow: 2px 0 12px #0005;
+                    padding: 18px 10px 18px 10px;
                     display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 28px;
-                    border-top: 2px solid #3a7afe44;
-                    border-radius: 18px 18px 0 0;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    gap: 18px;
+                    border-right: 2px solid #3a7afe44;
+                    border-radius: 0 18px 18px 0;
                     pointer-events: auto;
+                    min-width: 180px;
+                    max-width: 320px;
+                }
+                #globalTimerPopup {
+                    display: none;
+                    position: fixed;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.7);
+                    z-index: 9999;
+                    align-items: center;
+                    justify-content: center;
+                    animation: none;
+                    cursor: pointer;
+                }
+                #globalTimerPopup.flashing-bg {
+                    animation: flash-bg 0.7s infinite alternate;
+                }
+                #globalPopupContent {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                #globalPopupMsg {
+                    color: #fff;
+                    font-size: 2rem;
+                    margin-top: 10px;
+                    text-align: center;
                 }
                 #global-timer-bar .timer-bar-timer {
                     background: linear-gradient(90deg, #3a7afe 60%, #1e2a4a 100%);
@@ -333,7 +361,7 @@
             border: 1.5px solid rgba(255, 255, 255, 0.18);
             padding: 32px 20px 28px 20px;
             margin: 32px auto 32px auto;
-            max-width: 480px;
+            max-width: 720px;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -400,12 +428,14 @@
                     margin: 18px auto 32px auto;
                 }
                 .nav-header {
+                    padding: 24px;
+                    box-sizing: border-box;
                     width: 100%;
                     background: #23283a;
                     height: 56px;
                     box-shadow: 0 2px 8px #0002;
                     display: flex;
-                    justify-content: center;
+                    justify-content: space-between;
                     align-items: center;
                     position: fixed;
                     top: 0;
@@ -417,6 +447,7 @@
                     gap: 18px;
                     font-size: 1.2rem;
                     align-items: center;
+                    justify-content: right;
                 }
                 .nav-header a {
                     color: #3a7afe;
@@ -452,22 +483,7 @@
                 main, .center-container, .main-content {
                     margin-top: 64px;
                 }
-        .nav-header nav {
-            display: flex;
-            gap: 18px;
-            font-size: 1.2rem;
-        }
-        .nav-header a {
-            color: #3a7afe;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 0 8px;
-            transition: color 0.2s;
-        }
-        .nav-header a:hover {
-            color: #fff;
-            text-decoration: underline;
-        }
+       
         body {
             background: #181c24;
             color: #f3f3f3;
@@ -484,8 +500,6 @@
             margin-bottom: 10px;
             font-size: 5.2rem;
         }
-        
-
         label, select, input {
             font-size: 1.1rem;
         }
@@ -600,3 +614,56 @@
         #timerPopup {
             cursor: pointer;
         }
+                /* Flashcard set dropdown styling */
+#set-controls label {
+    font-weight: 700;
+    color: #3a7afe;
+    font-size: 1.08rem;
+    margin-right: 8px;
+    letter-spacing: 0.5px;
+}
+#set-controls select {
+    background: linear-gradient(90deg, #23283a 60%, #3a7afe 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 32px;
+    font-size: 1.35rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(58,122,254,0.10);
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    outline: none;
+    margin: 0 8px 0 4px;
+    cursor: pointer;
+    min-width: 180px;
+    max-width: 340px;
+}
+#set-controls {
+    margin-bottom: 18px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+#flashcard-answer {
+    font-size: 2.55rem !important;
+    color: #b3c6ff;
+    margin-bottom: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Button hover cursor for all main, preset, and flashcard controls */
+.main-btn,
+.preset-timers .preset-btn,
+#set-controls button,
+#add-set-btn,
+#delete-set-btn,
+#show-answer-btn,
+#prev-btn,
+#next-btn,
+#delete-btn,
+#add-flashcard-form button {
+    cursor: pointer !important;
+}

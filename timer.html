@@ -5,15 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COMMS UNIT STUFF!</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
 <body>
-    <header class="nav-header">
-        <nav>
-            <a href="index.html"><span class="nav-icon">🏠</span> Home</a>
-            <a href="timer.html"><span class="nav-icon">⏲️</span> Timer</a>
-            <a href="flashcard.html"><span class="nav-icon">🃏</span> Flash Cards</a>
-        </nav>
-    </header>
+    <div id="header"></div>
     <main class="center-container glass-bg">
         <h1>Multi Timer</h1>
         <form id="newTimerForm" autocomplete="off" style="margin-bottom: 20px;">
@@ -82,7 +77,9 @@
         </div>
     </div>
     <div id="global-timer-bar"></div>
+    <audio id="timerAudio" src="audio/alarm.mp3" preload="auto"></audio>
     <script src="timer-bar.js" defer></script>
+    <script>$(function(){$("#header").load("header.html");});</script>
     <script>
                                         // Zulu (UTC) time sidebar logic
                                         function updateZuluSidebar() {
@@ -201,9 +198,15 @@
 
         function updateTimerDisplays() {
             timers.forEach((timer, idx) => {
+                // Always recalculate remaining based on endTime for perfect sync
+                if (timer.running && timer.endTime) {
+                    timer.remaining = Math.max(0, Math.round((timer.endTime - Date.now()) / 1000));
+                }
                 const el = document.getElementById(`timerDisplay${idx}`);
                 if (el) el.textContent = formatTime(timer.remaining);
             });
+            // Save to localStorage every update for cross-tab sync
+            saveTimers();
         }
 
         function renderTimers() {
@@ -269,6 +272,8 @@
 
         let lastFinishedTimerIdx = null;
         function showTimerPopup(name, idx) {
+            var audio = document.getElementById('timerAudio');
+            if (audio) { audio.currentTime = 0; audio.play(); }
             popupMsg.innerHTML = `<b>${name}</b><br>Time is up!<br><span style=\"font-size:1.1rem;\">(Click anywhere to close)</span>`;
             timerPopup.classList.add('flashing-bg');
             timerPopup.style.display = 'flex';
@@ -277,6 +282,8 @@
         function hideTimerPopupAndRestart() {
             timerPopup.style.display = 'none';
             timerPopup.classList.remove('flashing-bg');
+            var audio = document.getElementById('timerAudio');
+            if (audio) { audio.pause(); audio.currentTime = 0; }
             if (lastFinishedTimerIdx !== null && timers[lastFinishedTimerIdx]) {
                 // Reset and restart the timer
                 let timer = timers[lastFinishedTimerIdx];
@@ -329,7 +336,7 @@
                 timer.started = true;
                 timer.running = true;
                 timer.interval = setInterval(() => {
-                    // Calculate remaining time based on endTime
+                    // Always recalculate remaining based on endTime for perfect sync
                     timer.remaining = Math.max(0, Math.round((timer.endTime - Date.now()) / 1000));
                     timer.display = pad(Math.floor(timer.remaining/60)) + ':' + pad(timer.remaining%60);
                     updateTimerDisplays();
@@ -393,8 +400,8 @@
         timers.forEach((timer, idx) => {
             if (timer.running && timer.endTime) {
                 // Recalculate remaining time
-                timer.remaining = Math.max(0, Math.round((timer.endTime - Date.now()) / 1000));
                 timer.interval = setInterval(() => {
+                    // Always recalculate remaining based on endTime for perfect sync
                     timer.remaining = Math.max(0, Math.round((timer.endTime - Date.now()) / 1000));
                     updateTimerDisplays();
                     if (timer.remaining <= 0) {

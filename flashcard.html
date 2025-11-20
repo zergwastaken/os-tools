@@ -5,15 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flash Cards</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
 <body>
-    <header class="nav-header">
-        <nav>
-            <a href="index.html"><span class="nav-icon">🏠</span> Home</a>
-            <a href="timer.html"><span class="nav-icon">⏲️</span> Timer</a>
-            <a href="flashcard.html"><span class="nav-icon">🃏</span> Flash Cards</a>
-        </nav>
-    </header>
+    <div id="header"></div>
     <main class="center-container glass-bg">
         <h1>Flash Cards</h1>
         <div id="set-controls" style="margin-bottom:18px;text-align:center;">
@@ -34,6 +29,8 @@
             <button id="delete-btn" class="main-btn" style="background:#d32f2f;">Delete This Card</button>
         </div>
     </main>
+    <div id="global-timer-bar"></div>
+
     <section class="center-container glass-bg" style="margin-top:32px;max-width:420px;">
         <form id="add-flashcard-form" style="text-align:center;">
             <h2 style="font-size:1.2rem;margin-bottom:10px;">Add a New Flashcard</h2>
@@ -258,8 +255,8 @@
                 });
         }
         </script>
-    </main>
-    <div id="global-timer-bar"></div>
+    </section>
+    <script src="timer-bar.js" defer></script>
+    <script>$(function(){$("#header").load("header.html");});</script>
 </body>
-<script src="timer-bar.js" defer></script>
 </html>

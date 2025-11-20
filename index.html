@@ -5,16 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COMMS UNIT STUFF!</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
-<body>
-    <header class="nav-header">
-        <nav>
-            <a href="index.html"><span class="nav-icon">🏠</span> Home</a>
-            <a href="timer.html"><span class="nav-icon">⏲️</span> Timer</a>
-            <a href="flashcard.html"><span class="nav-icon">🃏</span> Flash Cards</a>
-        </nav>
-    </header>
 
+<body>
+    <div id="header"></div>
     <main class="center-container glass-bg">
         <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Radar and navigation" class="home-hero-img">
         <h1>COMMS UNIT STUFF!</h1>
@@ -24,13 +19,12 @@
             <a href="flashcard.html" class="main-btn"><span class="nav-icon">🃏</span> Go to Flash Cards</a>
         </div>
     </main>
-
-    <div id="global-timer-bar"></div>
     <footer class="site-footer">
         <h1>USCG RANDOM FACTS:</h1>
         <p id="fact-footer">The U.S. Coast Guard is the oldest continuous seagoing service in America.</p>
     </footer>
     <script src="main.js" defer></script>
     <script src="timer-bar.js" defer></script>
+    <script>$(function(){$("#header").load("header.html");});</script>
 </body>
 </html>

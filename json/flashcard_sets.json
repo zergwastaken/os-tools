@@ -1,14 +1,38 @@
 {
-  "NATO Alphabet": [
-    { "question": "What is the NATO phonetic for 'A'?", "answer": "Alpha" },
-    { "question": "What is the NATO phonetic for 'B'?", "answer": "Bravo" },
-    { "question": "What is the NATO phonetic for 'C'?", "answer": "Charlie" },
-    { "question": "What is the NATO phonetic for 'D'?", "answer": "Delta" },
-    { "question": "What is the NATO phonetic for 'E'?", "answer": "Echo" }
-  ],
-  "Math Basics": [
-    { "question": "What is 2 + 2?", "answer": "4" },
-    { "question": "What is 5 x 3?", "answer": "15" },
-    { "question": "What is the square root of 9?", "answer": "3" }
-  ]
+
+    "NATO Alphabet": [
+        { "question": "What is the NATO phonetic for 'A'?", "answer": "Alpha" },
+        { "question": "What is the NATO phonetic for 'B'?", "answer": "Bravo" },
+        { "question": "What is the NATO phonetic for 'C'?", "answer": "Charlie" },
+        { "question": "What is the NATO phonetic for 'D'?", "answer": "Delta" },
+        { "question": "What is the NATO phonetic for 'E'?", "answer": "Echo" },
+        { "question": "What is the NATO phonetic for 'F'?", "answer": "Foxtrot" },
+        { "question": "What is the NATO phonetic for 'G'?", "answer": "Golf" },
+        { "question": "What is the NATO phonetic for 'H'?", "answer": "Hotel" },
+        { "question": "What is the NATO phonetic for 'I'?", "answer": "India" },
+        { "question": "What is the NATO phonetic for 'J'?", "answer": "Juliett" },
+        { "question": "What is the NATO phonetic for 'K'?", "answer": "Kilo" },
+        { "question": "What is the NATO phonetic for 'L'?", "answer": "Lima" },
+        { "question": "What is the NATO phonetic for 'M'?", "answer": "Mike" },
+        { "question": "What is the NATO phonetic for 'N'?", "answer": "November" },
+        { "question": "What is the NATO phonetic for 'O'?", "answer": "Oscar" },
+        { "question": "What is the NATO phonetic for 'P'?", "answer": "Papa" },
+        { "question": "What is the NATO phonetic for 'Q'?", "answer": "Quebec" },
+        { "question": "What is the NATO phonetic for 'R'?", "answer": "Romeo" },
+        { "question": "What is the NATO phonetic for 'S'?", "answer": "Sierra" },
+        { "question": "What is the NATO phonetic for 'T'?", "answer": "Tango" },
+        { "question": "What is the NATO phonetic for 'U'?", "answer": "Uniform" },
+        { "question": "What is the NATO phonetic for 'V'?", "answer": "Victor" },
+        { "question": "What is the NATO phonetic for 'W'?", "answer": "Whiskey" },
+        { "question": "What is the NATO phonetic for 'X'?", "answer": "X-ray" },
+        { "question": "What is the NATO phonetic for 'Y'?", "answer": "Yankee" },
+        { "question": "What is the NATO phonetic for 'Z'?", "answer": "Zulu" }
+    ],
+
+    "Math Basics": [
+        { "question": "What is 2 + 2?", "answer": "4" },
+        { "question": "What is 5 x 3?", "answer": "15" },
+        { "question": "What is the square root of 9?", "answer": "3" }
+    ]
+
 }

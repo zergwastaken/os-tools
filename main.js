@@ -10,3 +10,4 @@ document.addEventListener('DOMContentLoaded', function() {
 			document.getElementById('fact-footer').textContent = 'Could not load fact.';
 		});
 });
+
