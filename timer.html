@@ -13,15 +13,15 @@
             <div class="zulu-row">
                 <div class="zulu-item">
                     <div class="zulu-label">Local Time</div>
-                    <div id="localTime" class="zulu-display"></div>
+                    <div id="localTime" class="zulu-display">--:--:--</div>
                 </div>
                 <div class="zulu-divider"></div>
                 <div class="zulu-item">
                     <div class="zulu-label">Zulu (UTC)</div>
-                    <div id="zuluTime" class="zulu-display"></div>
+                    <div id="zuluTime" class="zulu-display">--:--:--</div>
                 </div>
             </div>
-            <div id="zuluDiff" class="zulu-offset"></div>
+            <div id="zuluDiff" class="zulu-offset">Difference: UTC ±0 hours</div>
         </div>
     <main class="center-container glass-bg">
         <h1>Multi Timer</h1>
@@ -107,8 +107,8 @@
                                         // Zulu (UTC) time sidebar logic
                                         function updateZuluSidebar() {
                                             const now = new Date();
-                                            const local = now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
-                                            const zulu = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC'});
+                                            const local = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false});
+                                            const zulu = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'UTC'});
                                             const localHour = now.getHours();
                                             const zuluHour = now.getUTCHours();
                                             let diff = localHour - zuluHour;
@@ -238,28 +238,36 @@
                 div.style.borderRadius = '8px';
                 div.style.padding = '12px 18px';
                 div.style.margin = '10px 0';
-                div.style.width = '820px';
+                div.style.width = '100%';
+                div.style.maxWidth = '820px';
                 div.style.display = 'flex';
                 div.style.alignItems = 'center';
                 div.style.gap = '18px';
                 div.style.boxShadow = '0 2px 8px #0004';
+                div.style.boxSizing = 'border-box';
 
                 const name = document.createElement('span');
                 name.textContent = timer.name || 'Timer';
                 name.style.fontWeight = 'bold';
                 name.style.fontSize = '1.2rem';
                 name.style.minWidth = '90px';
+                name.style.maxWidth = '200px';
+                name.style.overflow = 'hidden';
+                name.style.textOverflow = 'ellipsis';
+                name.style.whiteSpace = 'nowrap';
+                name.style.flexShrink = '0';
+
+                // Flex spacer to push timer and buttons to the right
+                const spacer = document.createElement('div');
+                spacer.style.flex = '1';
 
                 const time = document.createElement('span');
                 time.textContent = formatTime(timer.remaining);
                 time.style.fontFamily = 'monospace';
                 time.style.fontSize = '2rem';
                 time.style.letterSpacing = '2px';
+                time.style.flexShrink = '0';
                 time.id = `timerDisplay${idx}`;
-
-                // Flex spacer to push buttons to the right
-                const spacer = document.createElement('div');
-                spacer.style.flex = '1';
 
                 const startBtn = document.createElement('button');
                 startBtn.textContent = timer.running ? 'Pause' : (timer.started ? 'Resume' : 'Start');
@@ -284,8 +292,8 @@
                 removeBtn.onclick = () => removeTimer(idx);
 
                 div.appendChild(name);
-                div.appendChild(time);
                 div.appendChild(spacer);
+                div.appendChild(time);
                 div.appendChild(startBtn);
                 div.appendChild(removeBtn);
                 timersList.appendChild(div);
