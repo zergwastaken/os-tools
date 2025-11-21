@@ -1,0 +1,38 @@
+[
+    {
+        "name": "US Navy Ship Parts",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/USS_Gettysburg_%28CG-64%29_underway_in_the_Atlantic_Ocean_on_22_April_2010_%28100422-N-7058E-457%29.jpg/1200px-USS_Gettysburg_%28CG-64%29_underway_in_the_Atlantic_Ocean_on_22_April_2010_%28100422-N-7058E-457%29.jpg",
+        "points": [
+            {"x": 15, "y": 30, "label": "Bow"},
+            {"x": 85, "y": 35, "label": "Stern"},
+            {"x": 40, "y": 25, "label": "Bridge"},
+            {"x": 50, "y": 40, "label": "Midship"},
+            {"x": 30, "y": 50, "label": "Port Side"},
+            {"x": 70, "y": 50, "label": "Starboard Side"}
+        ],
+        "isDefault": true
+    },
+    {
+        "name": "World Oceans",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Equirectangular_projection_SW.jpg/1200px-Equirectangular_projection_SW.jpg",
+        "points": [
+            {"x": 50, "y": 70, "label": "Pacific Ocean"},
+            {"x": 50, "y": 35, "label": "Atlantic Ocean"},
+            {"x": 75, "y": 55, "label": "Indian Ocean"},
+            {"x": 50, "y": 10, "label": "Arctic Ocean"},
+            {"x": 50, "y": 90, "label": "Southern Ocean"}
+        ],
+        "isDefault": true
+    },
+    {
+        "name": "Navigation Chart Symbols",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Nautical_chart_symbols.svg/800px-Nautical_chart_symbols.svg.png",
+        "points": [
+            {"x": 20, "y": 30, "label": "Buoy"},
+            {"x": 50, "y": 40, "label": "Lighthouse"},
+            {"x": 70, "y": 50, "label": "Anchorage"},
+            {"x": 40, "y": 60, "label": "Wreck"}
+        ],
+        "isDefault": true
+    }
+]

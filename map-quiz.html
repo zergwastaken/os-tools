@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Quiz</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="images/logo.png">
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>Map Quiz</h1>
+        
+        <!-- Quiz mode selector -->
+        <div id="quiz-mode-selector" style="margin-bottom: 20px;">
+            <button id="practice-mode-btn" class="mode-btn active">Practice Mode</button>
+            <button id="quiz-mode-btn" class="mode-btn">Quiz Mode</button>
+        </div>
+
+        <!-- Map selection -->
+        <div id="map-selection" style="margin-bottom: 20px;">
+            <label for="map-select" style="font-weight:700; color:#3a7afe; font-size:1.08rem;">Select Map:</label>
+            <select id="map-select" style="margin:0 8px; padding:8px 16px; font-size:1.1rem;">
+                <option value="">-- Choose a Map --</option>
+            </select>
+            <button id="new-map-btn" class="main-btn" style="padding:8px 16px; font-size:0.95rem;">Create New Map</button>
+        </div>
+
+        <!-- Map container -->
+        <div id="map-container" style="position:relative; max-width:800px; width:100%; margin:20px auto; display:none;">
+            <img id="map-image" src="" alt="Map" style="width:100%; height:auto; border-radius:12px; box-shadow:0 4px 12px #0004;">
+            <div id="map-pins"></div>
+        </div>
+
+        <!-- Quiz controls -->
+        <div id="quiz-controls" style="display:none; margin-top:20px;">
+            <div id="current-question" style="font-size:1.3rem; font-weight:600; margin-bottom:15px;"></div>
+            <input type="text" id="answer-input" placeholder="Enter your answer" style="width:90%; max-width:400px; margin-bottom:15px; padding:12px; font-size:1.1rem;">
+            <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                <button id="submit-answer-btn" class="main-btn" style="padding:12px 32px;">Submit Answer</button>
+                <button id="skip-btn" class="main-btn" style="padding:12px 32px; background:#ffb13a;">Skip</button>
+                <button id="end-quiz-btn" class="main-btn" style="padding:12px 32px; background:#d32f2f;">End Quiz</button>
+            </div>
+            <div id="feedback-msg" style="margin-top:20px; font-size:1.2rem; font-weight:600;"></div>
+        </div>
+
+        <!-- Quiz results -->
+        <div id="quiz-results" style="display:none; margin-top:20px;">
+            <h2 style="color:#3a7afe;">Quiz Complete!</h2>
+            <div id="score-display" style="font-size:1.5rem; margin:20px 0;"></div>
+            <button id="retake-quiz-btn" class="main-btn" style="padding:12px 32px;">Retake Quiz</button>
+        </div>
+
+        <!-- Edit mode controls (shown when creating/editing maps) -->
+        <div id="edit-controls" style="display:none; margin-top:20px;">
+            <h3>Edit Map</h3>
+            <div style="margin-bottom:15px;">
+                <label for="map-name-input" style="font-weight:600;">Map Name:</label>
+                <input type="text" id="map-name-input" placeholder="Enter map name" style="width:90%; max-width:400px; margin:8px 0;">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label for="map-image-input" style="font-weight:600;">Map Image URL:</label>
+                <input type="text" id="map-image-input" placeholder="Enter image URL" style="width:90%; max-width:400px; margin:8px 0;">
+                <button id="load-image-btn" class="main-btn" style="padding:8px 16px; font-size:0.9rem; margin-left:8px;">Load Image</button>
+            </div>
+            <div style="margin-bottom:15px;">
+                <p style="color:#b3c6ff;">Click on the map to add labeled points</p>
+            </div>
+            <div style="margin-bottom:15px;">
+                <button id="save-map-btn" class="main-btn" style="padding:10px 24px; background:#3a7afe;">Save Map</button>
+                <button id="cancel-edit-btn" class="main-btn" style="padding:10px 24px; background:#d32f2f; margin-left:10px;">Cancel</button>
+            </div>
+            <!-- Points list -->
+            <div id="points-list" style="margin-top:20px;">
+                <h4>Added Points:</h4>
+                <div id="points-container"></div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="global-timer-bar"></div>
+    <script src="timer-bar.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>
+        fetch('header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        let maps = [];
+        let defaultMaps = [];
+        let currentMap = null;
+        let editMode = false;
+        let quizMode = false;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = [];
+        
+        // Load default maps from JSON
+        function loadDefaultMaps() {
+            fetch('json/default_maps.json')
+                .then(res => res.json())
+                .then(data => {
+                    defaultMaps = data;
+                    loadMaps();
+                })
+                .catch(err => {
+                    console.error('Failed to load default maps:', err);
+                    loadMaps();
+                });
+        }
+        
+        // Load maps from localStorage
+        function loadMaps() {
+            const saved = localStorage.getItem('mapQuizMaps');
+            if (saved) {
+                try {
+                    maps = JSON.parse(saved);
+                } catch {
+                    maps = [];
+                }
+            }
+            // Combine default maps with user maps
+            maps = [...defaultMaps, ...maps];
+            renderMapSelect();
+        }
+        
+        // Save maps to localStorage (exclude default maps)
+        function saveMaps() {
+            const userMaps = maps.filter(m => !m.isDefault);
+            localStorage.setItem('mapQuizMaps', JSON.stringify(userMaps));
+        }
+        
+        // Render map selection dropdown
+        function renderMapSelect() {
+            const select = $('#map-select');
+            select.html('<option value="">-- Choose a Map --</option>');
+            maps.forEach((map, idx) => {
+                select.append(`<option value="${idx}">${map.name}</option>`);
+            });
+        }
+        
+        // Display selected map
+        function displayMap(mapIndex) {
+            currentMap = maps[mapIndex];
+            if (!currentMap) return;
+            
+            $('#map-image').attr('src', currentMap.imageUrl);
+            $('#map-container').show();
+            renderPins();
+            
+            if (quizMode) {
+                startQuiz();
+            } else {
+                $('#quiz-controls').hide();
+                $('#quiz-results').hide();
+            }
+        }
+        
+        // Render pins on map
+        function renderPins() {
+            const pinsContainer = $('#map-pins');
+            pinsContainer.empty();
+            
+            if (!currentMap || !currentMap.points) return;
+            
+            currentMap.points.forEach((point, idx) => {
+                const pin = $('<div class="map-pin"></div>');
+                pin.css({
+                    position: 'absolute',
+                    left: point.x + '%',
+                    top: point.y + '%',
+                    width: '24px',
+                    height: '24px',
+                    background: '#ff2222',
+                    border: '3px solid #fff',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px #0008',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10
+                });
+                
+                // Show label in practice mode
+                if (!quizMode && !editMode) {
+                    const label = $(`<div class="map-label">${point.label}</div>`);
+                    label.css({
+                        position: 'absolute',
+                        left: point.x + '%',
+                        top: (point.y - 5) + '%',
+                        transform: 'translate(-50%, -100%)',
+                        background: '#23283a',
+                        color: '#fff',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        fontWeight: '600',
+                        whiteSpace: 'nowrap',
+                        boxShadow: '0 2px 8px #0008',
+                        zIndex: 11
+                    });
+                    pinsContainer.append(label);
+                }
+                
+                // Click to remove in edit mode
+                if (editMode) {
+                    pin.on('click', function(e) {
+                        e.stopPropagation();
+                        if (confirm(`Remove point "${point.label}"?`)) {
+                            currentMap.points.splice(idx, 1);
+                            renderPins();
+                            renderPointsList();
+                        }
+                    });
+                }
+                
+                pinsContainer.append(pin);
+            });
+        }
+        
+        // Start quiz mode
+        function startQuiz() {
+            if (!currentMap || !currentMap.points || currentMap.points.length === 0) {
+                alert('This map has no points to quiz on!');
+                return;
+            }
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions = [];
+            
+            // Shuffle questions
+            const shuffled = [...currentMap.points].sort(() => Math.random() - 0.5);
+            currentMap.quizOrder = shuffled;
+            
+            $('#quiz-controls').show();
+            $('#quiz-results').hide();
+            showNextQuestion();
+        }
+        
+        // Show next question
+        function showNextQuestion() {
+            if (currentQuestionIndex >= currentMap.quizOrder.length) {
+                endQuiz();
+                return;
+            }
+            
+            const point = currentMap.quizOrder[currentQuestionIndex];
+            $('#current-question').text(`Question ${currentQuestionIndex + 1} of ${currentMap.quizOrder.length}: What is marked at this location?`);
+            $('#answer-input').val('').focus();
+            $('#feedback-msg').empty();
+            
+            // Highlight current pin
+            highlightPin(point);
+        }
+        
+        // Highlight specific pin
+        function highlightPin(point) {
+            const pinsContainer = $('#map-pins');
+            pinsContainer.empty();
+            
+            currentMap.points.forEach((p) => {
+                const pin = $('<div class="map-pin"></div>');
+                const isTarget = (p.x === point.x && p.y === point.y && p.label === point.label);
+                
+                pin.css({
+                    position: 'absolute',
+                    left: p.x + '%',
+                    top: p.y + '%',
+                    width: isTarget ? '32px' : '24px',
+                    height: isTarget ? '32px' : '24px',
+                    background: isTarget ? '#ffff00' : '#ff2222',
+                    border: '3px solid #fff',
+                    borderRadius: '50%',
+                    cursor: 'default',
+                    boxShadow: isTarget ? '0 0 20px #ffff0088' : '0 2px 8px #0008',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: isTarget ? 20 : 10,
+                    animation: isTarget ? 'pulse 1.5s infinite' : 'none'
+                });
+                
+                pinsContainer.append(pin);
+            });
+        }
+        
+        // Submit answer
+        function submitAnswer() {
+            const userAnswer = $('#answer-input').val().trim();
+            if (!userAnswer) {
+                $('#feedback-msg').html('<span style="color:#ffb13a;">Please enter an answer!</span>');
+                return;
+            }
+            
+            const correctAnswer = currentMap.quizOrder[currentQuestionIndex].label;
+            const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            
+            if (isCorrect) {
+                score++;
+                $('#feedback-msg').html('<span style="color:#4caf50;">✓ Correct!</span>');
+            } else {
+                $('#feedback-msg').html(`<span style="color:#ff2222;">✗ Wrong! The correct answer is: ${correctAnswer}</span>`);
+            }
+            
+            answeredQuestions.push({
+                question: correctAnswer,
+                userAnswer: userAnswer,
+                correct: isCorrect
+            });
+            
+            setTimeout(() => {
+                currentQuestionIndex++;
+                showNextQuestion();
+            }, 2000);
+        }
+        
+        // Skip question
+        function skipQuestion() {
+            const correctAnswer = currentMap.quizOrder[currentQuestionIndex].label;
+            answeredQuestions.push({
+                question: correctAnswer,
+                userAnswer: '(skipped)',
+                correct: false
+            });
+            
+            currentQuestionIndex++;
+            showNextQuestion();
+        }
+        
+        // End quiz
+        function endQuiz() {
+            $('#quiz-controls').hide();
+            $('#quiz-results').show();
+            
+            const percentage = Math.round((score / currentMap.quizOrder.length) * 100);
+            $('#score-display').html(`
+                <p>You scored <strong style="color:#3a7afe;">${score}</strong> out of <strong>${currentMap.quizOrder.length}</strong> (${percentage}%)</p>
+                <div style="text-align:left; max-width:400px; margin:20px auto;">
+                    ${answeredQuestions.map((q, idx) => `
+                        <div style="margin-bottom:10px; padding:8px; background:#23283a; border-radius:6px;">
+                            <strong>${idx + 1}. ${q.question}</strong><br>
+                            Your answer: <span style="color:${q.correct ? '#4caf50' : '#ff2222'}">${q.userAnswer}</span>
+                            ${q.correct ? '✓' : '✗'}
+                        </div>
+                    `).join('')}
+                </div>
+            `);
+        }
+        
+        // Edit mode functions
+        function enterEditMode(mapIndex = null) {
+            editMode = true;
+            quizMode = false;
+            
+            if (mapIndex !== null) {
+                currentMap = JSON.parse(JSON.stringify(maps[mapIndex])); // Deep copy
+            } else {
+                currentMap = {
+                    name: '',
+                    imageUrl: '',
+                    points: []
+                };
+            }
+            
+            $('#map-selection').hide();
+            $('#quiz-mode-selector').hide();
+            $('#edit-controls').show();
+            $('#quiz-controls').hide();
+            $('#quiz-results').hide();
+            
+            $('#map-name-input').val(currentMap.name);
+            $('#map-image-input').val(currentMap.imageUrl);
+            
+            if (currentMap.imageUrl) {
+                $('#map-image').attr('src', currentMap.imageUrl);
+                $('#map-container').show();
+                renderPins();
+            }
+            
+            renderPointsList();
+            
+            // Add click handler to map for adding points
+            $('#map-image').off('click').on('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                
+                const label = prompt('Enter label for this point:');
+                if (label) {
+                    currentMap.points.push({ x: x, y: y, label: label });
+                    renderPins();
+                    renderPointsList();
+                }
+            });
+        }
+        
+        function renderPointsList() {
+            const container = $('#points-container');
+            container.empty();
+            
+            if (!currentMap.points || currentMap.points.length === 0) {
+                container.html('<p style="color:#b3c6ff; font-style:italic;">No points added yet</p>');
+                return;
+            }
+            
+            currentMap.points.forEach((point, idx) => {
+                const pointDiv = $(`
+                    <div style="background:#23283a; padding:8px 12px; margin:8px 0; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                        <span><strong>${idx + 1}.</strong> ${point.label}</span>
+                        <button class="remove-point-btn" data-idx="${idx}" style="background:#d32f2f; color:#fff; border:none; padding:4px 12px; border-radius:4px; cursor:pointer;">Remove</button>
+                    </div>
+                `);
+                container.append(pointDiv);
+            });
+            
+            $('.remove-point-btn').on('click', function() {
+                const idx = $(this).data('idx');
+                currentMap.points.splice(idx, 1);
+                renderPins();
+                renderPointsList();
+            });
+        }
+        
+        function saveMap() {
+            currentMap.name = $('#map-name-input').val().trim();
+            currentMap.imageUrl = $('#map-image-input').val().trim();
+            
+            if (!currentMap.name || !currentMap.imageUrl) {
+                alert('Please provide both a map name and image URL!');
+                return;
+            }
+            
+            if (currentMap.points.length === 0) {
+                alert('Please add at least one point to the map!');
+                return;
+            }
+            
+            // Check if updating existing non-default map
+            const existingIndex = maps.findIndex(m => m.name === currentMap.name && !m.isDefault);
+            if (existingIndex >= 0) {
+                maps[existingIndex] = currentMap;
+            } else {
+                // Don't allow overwriting default maps
+                if (maps.find(m => m.name === currentMap.name && m.isDefault)) {
+                    alert('Cannot overwrite a default map. Please choose a different name.');
+                    return;
+                }
+                maps.push(currentMap);
+            }
+            
+            saveMaps();
+            exitEditMode();
+            alert('Map saved successfully!');
+        }
+        
+        function exitEditMode() {
+            editMode = false;
+            currentMap = null;
+            
+            $('#edit-controls').hide();
+            $('#map-selection').show();
+            $('#quiz-mode-selector').show();
+            $('#map-container').hide();
+            
+            loadMaps();
+        }
+        
+        // Event handlers
+        $('#map-select').on('change', function() {
+            const idx = $(this).val();
+            if (idx !== '') {
+                displayMap(parseInt(idx));
+            } else {
+                $('#map-container').hide();
+                $('#quiz-controls').hide();
+                $('#quiz-results').hide();
+            }
+        });
+        
+        $('#practice-mode-btn').on('click', function() {
+            quizMode = false;
+            $(this).addClass('active');
+            $('#quiz-mode-btn').removeClass('active');
+            $('#quiz-controls').hide();
+            $('#quiz-results').hide();
+            if (currentMap) renderPins();
+        });
+        
+        $('#quiz-mode-btn').on('click', function() {
+            quizMode = true;
+            $(this).addClass('active');
+            $('#practice-mode-btn').removeClass('active');
+            if (currentMap) startQuiz();
+        });
+        
+        $('#new-map-btn').on('click', function() {
+            enterEditMode();
+        });
+        
+        $('#load-image-btn').on('click', function() {
+            const url = $('#map-image-input').val().trim();
+            if (url) {
+                $('#map-image').attr('src', url);
+                $('#map-container').show();
+                currentMap.imageUrl = url;
+            }
+        });
+        
+        $('#save-map-btn').on('click', saveMap);
+        $('#cancel-edit-btn').on('click', exitEditMode);
+        
+        $('#submit-answer-btn').on('click', submitAnswer);
+        $('#skip-btn').on('click', skipQuestion);
+        $('#end-quiz-btn').on('click', function() {
+            if (confirm('Are you sure you want to end the quiz?')) {
+                endQuiz();
+            }
+        });
+        
+        $('#retake-quiz-btn').on('click', function() {
+            startQuiz();
+        });
+        
+        $('#answer-input').on('keypress', function(e) {
+            if (e.which === 13) {
+                submitAnswer();
+            }
+        });
+        
+        // Add pulse animation for highlighted pins
+        $('<style>@keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } }</style>').appendTo('head');
+        
+        // Initialize
+        loadDefaultMaps();
+    </script>
+</body>
+</html>

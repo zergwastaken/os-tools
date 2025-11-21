@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Games - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="images/logo.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg mt-100">
+        <h1>Mini Games</h1>
+        <p style="text-align: center; margin-bottom: 30px; color: #b3c6ff;">Take a break with these quick games!</p>
+        
+        <div class="games-grid">
+            <!-- Snake Game -->
+            <div class="game-card">
+                <h2>Snake</h2>
+                <div class="game-container">
+                    <canvas id="snakeCanvas" width="300" height="300"></canvas>
+                    <div class="game-score">Score: <span id="snakeScore">0</span></div>
+                    <button class="game-btn" id="snakeStart">Start Game</button>
+                </div>
+            </div>
+
+            <!-- Memory Match Game -->
+            <div class="game-card">
+                <h2>Memory Match</h2>
+                <div class="game-container">
+                    <div id="memoryGrid" class="memory-grid"></div>
+                    <div class="game-score">Moves: <span id="memoryMoves">0</span> | Pairs: <span id="memoryPairs">0</span>/8</div>
+                    <button class="game-btn" id="memoryStart">New Game</button>
+                </div>
+            </div>
+
+            <!-- Reaction Time Game -->
+            <div class="game-card">
+                <h2>Reaction Test</h2>
+                <div class="game-container">
+                    <div id="reactionBox" class="reaction-box">Click to Start</div>
+                    <div class="game-score">Best: <span id="reactionBest">-</span> ms</div>
+                    <button class="game-btn" id="reactionReset">Reset</button>
+                </div>
+            </div>
+
+            <!-- Number Guess Game -->
+            <div class="game-card">
+                <h2>Number Guesser</h2>
+                <div class="game-container">
+                    <p id="guessHint">Guess a number between 1-100</p>
+                    <input type="number" id="guessInput" min="1" max="100" placeholder="Enter guess">
+                    <div class="game-score">Attempts: <span id="guessAttempts">0</span></div>
+                    <button class="game-btn" id="guessSubmit">Guess</button>
+                    <button class="game-btn" id="guessNew">New Game</button>
+                </div>
+            </div>
+
+            <!-- Whack-a-Mole Game -->
+            <div class="game-card">
+                <h2>Whack-a-Mole</h2>
+                <div class="game-container">
+                    <div id="moleGrid" class="mole-grid">
+                        <div class="mole-hole" data-index="0"></div>
+                        <div class="mole-hole" data-index="1"></div>
+                        <div class="mole-hole" data-index="2"></div>
+                        <div class="mole-hole" data-index="3"></div>
+                        <div class="mole-hole" data-index="4"></div>
+                        <div class="mole-hole" data-index="5"></div>
+                        <div class="mole-hole" data-index="6"></div>
+                        <div class="mole-hole" data-index="7"></div>
+                        <div class="mole-hole" data-index="8"></div>
+                    </div>
+                    <div class="game-score">Score: <span id="moleScore">0</span> | Time: <span id="moleTime">30</span>s</div>
+                    <button class="game-btn" id="moleStart">Start Game</button>
+                </div>
+            </div>
+
+            <!-- Simon Says -->
+            <div class="game-card">
+                <h2>Simon Says</h2>
+                <div class="game-container">
+                    <div class="simon-grid">
+                        <div class="simon-btn simon-green" data-color="green"></div>
+                        <div class="simon-btn simon-red" data-color="red"></div>
+                        <div class="simon-btn simon-yellow" data-color="yellow"></div>
+                        <div class="simon-btn simon-blue" data-color="blue"></div>
+                    </div>
+                    <div class="game-score">Level: <span id="simonLevel">0</span></div>
+                    <button class="game-btn" id="simonStart">Start Game</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="timer-bar.js" defer></script>
+    <script>
+        fetch('header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script src="mini-games.js"></script>
+</body>
+</html>

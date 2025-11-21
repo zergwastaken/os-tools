@@ -3,14 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COMMS UNIT STUFF!</title>
+    <title>OS TOOLS - Multi Timer</title>
+    <link rel="icon" type="image/x-icon" href="images/logo.png">
     <link rel="stylesheet" href="style.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
 <body>
     <div id="header"></div>
+        <div class="zulu-time-card">
+            <div class="zulu-row">
+                <div class="zulu-item">
+                    <div class="zulu-label">Local Time</div>
+                    <div id="localTime" class="zulu-display"></div>
+                </div>
+                <div class="zulu-divider"></div>
+                <div class="zulu-item">
+                    <div class="zulu-label">Zulu (UTC)</div>
+                    <div id="zuluTime" class="zulu-display"></div>
+                </div>
+            </div>
+            <div id="zuluDiff" class="zulu-offset"></div>
+        </div>
     <main class="center-container glass-bg">
         <h1>Multi Timer</h1>
+        
         <form id="newTimerForm" autocomplete="off" style="margin-bottom: 20px;">
                     <div class="preset-timers">
                         <button type="button" class="preset-btn" data-hours="0" data-minutes="30" data-seconds="0">Boat Timer (30 min)</button>
@@ -61,25 +76,33 @@
                 <button type="submit" id="addTimer" class="">Add Timer</button>
             </div>
         </form>
-        <div id="zuluSidebar" class="zulu-sidebar">
-            <div class="zulu-title">Local vs Zulu Time</div>
-            <div id="localTime" class="zulu-time"></div>
-            <div id="zuluTime" class="zulu-time"></div>
-            <div id="zuluDiff" class="zulu-diff"></div>
-        </div>
         <div id="timersList"></div>
+
     </main>
     <!-- Flashing popup for timer end -->
     <div id="timerPopup">
         <div id="popupContent">
             <span class="flashing">!</span>
-            <div id="popupMsg">Time is up!<br><span style="font-size:1.1rem;">(Click anywhere to restart timer)</span></div>
+            <div id="popupMsg">Time is up!</div>
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="restartTimerBtn" style="padding: 12px 24px; font-size: 1.1rem; background: #3a7afe; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Restart Timer</button>
+                <button id="stopTimerBtn" style="padding: 12px 24px; font-size: 1.1rem; background: #d32f2f; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Stop</button>
+            </div>
         </div>
     </div>
     <div id="global-timer-bar"></div>
     <audio id="timerAudio" src="audio/alarm.mp3" preload="auto"></audio>
     <script src="timer-bar.js" defer></script>
-    <script>$(function(){$("#header").load("header.html");});</script>
+    <script>
+        fetch('header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
     <script>
                                         // Zulu (UTC) time sidebar logic
                                         function updateZuluSidebar() {
@@ -96,14 +119,12 @@
                                                 absDiff = 24 - absDiff;
                                                 sign = diff > 0 ? '-' : '+';
                                             }
-                                            document.getElementById('localTime').textContent = `Local: ${local}`;
-                                            document.getElementById('zuluTime').textContent = `Zulu (UTC): ${zulu}`;
+                                            document.getElementById('localTime').textContent = local;
+                                            document.getElementById('zuluTime').textContent = zulu;
                                             document.getElementById('zuluDiff').textContent = `Difference: UTC ${sign}${absDiff} hours`;
                                         }
-                                        if (document.getElementById('zuluSidebar')) {
-                                            updateZuluSidebar();
-                                            setInterval(updateZuluSidebar, 1000);
-                                        }
+                                        updateZuluSidebar();
+                                        setInterval(updateZuluSidebar, 1000);
                                 // Preset timer buttons logic
                                 document.querySelectorAll('.preset-btn').forEach(btn => {
                                     btn.addEventListener('click', function() {
@@ -217,6 +238,7 @@
                 div.style.borderRadius = '8px';
                 div.style.padding = '12px 18px';
                 div.style.margin = '10px 0';
+                div.style.width = '820px';
                 div.style.display = 'flex';
                 div.style.alignItems = 'center';
                 div.style.gap = '18px';
@@ -274,18 +296,19 @@
         function showTimerPopup(name, idx) {
             var audio = document.getElementById('timerAudio');
             if (audio) { audio.currentTime = 0; audio.play(); }
-            popupMsg.innerHTML = `<b>${name}</b><br>Time is up!<br><span style=\"font-size:1.1rem;\">(Click anywhere to close)</span>`;
+            popupMsg.innerHTML = `<b>${name}</b><br>Time is up!`;
             timerPopup.classList.add('flashing-bg');
             timerPopup.style.display = 'flex';
             lastFinishedTimerIdx = idx;
         }
-        function hideTimerPopupAndRestart() {
+        function hideTimerPopup() {
             timerPopup.style.display = 'none';
             timerPopup.classList.remove('flashing-bg');
             var audio = document.getElementById('timerAudio');
             if (audio) { audio.pause(); audio.currentTime = 0; }
+        }
+        function restartTimer() {
             if (lastFinishedTimerIdx !== null && timers[lastFinishedTimerIdx]) {
-                // Reset and restart the timer
                 let timer = timers[lastFinishedTimerIdx];
                 timer.remaining = timer.total;
                 timer.display = pad(Math.floor(timer.remaining/60)) + ':' + pad(timer.remaining%60);
@@ -295,9 +318,24 @@
                 renderTimers();
                 toggleTimer(lastFinishedTimerIdx);
             }
+            hideTimerPopup();
             lastFinishedTimerIdx = null;
         }
-        timerPopup && timerPopup.addEventListener('click', hideTimerPopupAndRestart);
+        function stopTimer() {
+            if (lastFinishedTimerIdx !== null && timers[lastFinishedTimerIdx]) {
+                let timer = timers[lastFinishedTimerIdx];
+                timer.remaining = timer.total;
+                timer.running = false;
+                timer.started = false;
+                timer.endTime = null;
+                saveTimers();
+                renderTimers();
+            }
+            hideTimerPopup();
+            lastFinishedTimerIdx = null;
+        }
+        document.getElementById('restartTimerBtn').addEventListener('click', restartTimer);
+        document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
 
         timerType.addEventListener('change', function() {
             if (this.value === 'duration') {

@@ -67,7 +67,9 @@ function updateTimerBar() {
 }
 
 // Flashing popup for timer end
+let globalFinishedTimerName = null;
 function showGlobalTimerPopup(name) {
+    globalFinishedTimerName = name;
     let popup = document.getElementById('globalTimerPopup');
     // Play audio
     let audio = document.getElementById('timerAudio');
@@ -83,18 +85,76 @@ function showGlobalTimerPopup(name) {
     if (!popup) {
         popup = document.createElement('div');
         popup.id = 'globalTimerPopup';
-        popup.innerHTML = `<div id="globalPopupContent"><span class="flashing">!</span><div id="globalPopupMsg"></div></div>`;
+        popup.innerHTML = `
+            <div id="globalPopupContent">
+                <span class="flashing">!</span>
+                <div id="globalPopupMsg"></div>
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button id="globalRestartBtn" style="padding: 12px 24px; font-size: 1.1rem; background: #3a7afe; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Restart Timer</button>
+                    <button id="globalStopBtn" style="padding: 12px 24px; font-size: 1.1rem; background: #d32f2f; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Stop</button>
+                </div>
+            </div>`;
         document.body.appendChild(popup);
+        
+        // Add event listeners
+        document.getElementById('globalRestartBtn').addEventListener('click', function() {
+            restartGlobalTimer();
+        });
+        document.getElementById('globalStopBtn').addEventListener('click', function() {
+            stopGlobalTimer();
+        });
     }
-    document.getElementById('globalPopupMsg').innerHTML = `<b>${name}</b><br>Time is up!<br><span style="font-size:1.1rem;">(Click anywhere to close)</span>`;
+    document.getElementById('globalPopupMsg').innerHTML = `<b>${name}</b><br>Time is up!`;
     popup.classList.add('flashing-bg');
     popup.style.display = 'flex';
-    popup.onclick = function() {
+}
+
+function hideGlobalPopup() {
+    const popup = document.getElementById('globalTimerPopup');
+    if (popup) {
         popup.style.display = 'none';
         popup.classList.remove('flashing-bg');
-        var audio = document.getElementById('timerAudio');
-        if (audio) { audio.pause(); audio.currentTime = 0; }
-    };
+    }
+    const audio = document.getElementById('timerAudio');
+    if (audio) { 
+        audio.pause(); 
+        audio.currentTime = 0; 
+    }
+    globalFinishedTimerName = null;
+}
+
+function restartGlobalTimer() {
+    if (globalFinishedTimerName) {
+        // Find the finished timer and restart it
+        let timers = getAllTimers();
+        let timerIdx = timers.findIndex(t => t.name === globalFinishedTimerName && !t.running && t.remaining === 0);
+        if (timerIdx !== -1) {
+            let timer = timers[timerIdx];
+            timer.remaining = timer.total;
+            timer.running = true;
+            timer.started = true;
+            timer.endTime = Date.now() + timer.total * 1000;
+            localStorage.setItem('timers', JSON.stringify(timers));
+        }
+    }
+    hideGlobalPopup();
+}
+
+function stopGlobalTimer() {
+    if (globalFinishedTimerName) {
+        // Find the finished timer and reset it
+        let timers = getAllTimers();
+        let timerIdx = timers.findIndex(t => t.name === globalFinishedTimerName && !t.running && t.remaining === 0);
+        if (timerIdx !== -1) {
+            let timer = timers[timerIdx];
+            timer.remaining = timer.total;
+            timer.running = false;
+            timer.started = false;
+            timer.endTime = null;
+            localStorage.setItem('timers', JSON.stringify(timers));
+        }
+    }
+    hideGlobalPopup();
 }
 
 // Track finished timers
