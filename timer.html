@@ -28,9 +28,9 @@
         
         <form id="newTimerForm" autocomplete="off" style="margin-bottom: 20px;">
                     <div class="preset-timers">
-                        <button type="button" class="preset-btn" data-hours="0" data-minutes="30" data-seconds="0">Boat Timer (30 min)</button>
-                        <button type="button" class="preset-btn" data-hours="0" data-minutes="15" data-seconds="0">Heli Timer (15 min)</button>
-                        <button type="button" class="preset-btn" data-hours="4" data-minutes="0" data-seconds="0">Cutter Timer (4 hr)</button>
+                        <button type="button" class="preset-btn" data-hours="0" data-minutes="30" data-seconds="0" data-icon="🚤" data-name="Boat Timer">🚤 Boat Timer (30 min)</button>
+                        <button type="button" class="preset-btn" data-hours="0" data-minutes="15" data-seconds="0" data-icon="🚁" data-name="Heli Timer">🚁 Heli Timer (15 min)</button>
+                        <button type="button" class="preset-btn" data-hours="4" data-minutes="0" data-seconds="0" data-icon="⛴️" data-name="Cutter Timer">⛴️ Cutter Timer (4 hr)</button>
                     </div>
             <div class="timer-form-row">
                 <input type="text" id="timerName" placeholder="Timer name" maxlength="30">
@@ -131,9 +131,16 @@
                                         const hours = document.getElementById('hours');
                                         const minutes = document.getElementById('minutes');
                                         const seconds = document.getElementById('seconds');
+                                        const timerName = document.getElementById('timerName');
                                         hours.value = this.dataset.hours;
                                         minutes.value = this.dataset.minutes;
                                         seconds.value = this.dataset.seconds;
+                                        // Only set the name if input is empty
+                                        if (!timerName.value.trim()) {
+                                            timerName.value = this.dataset.name || '';
+                                        }
+                                        // Store the icon in a temporary attribute
+                                        timerName.dataset.icon = this.dataset.icon || '';
                                         hours.dispatchEvent(new Event('input', { bubbles: true }));
                                         minutes.dispatchEvent(new Event('input', { bubbles: true }));
                                         seconds.dispatchEvent(new Event('input', { bubbles: true }));
@@ -232,7 +239,19 @@
 
         function renderTimers() {
             timersList.innerHTML = '';
-            timers.forEach((timer, idx) => {
+            // Sort timers by remaining time (closest to expiring first)
+            const sortedTimers = timers.map((timer, idx) => ({timer, idx})).sort((a, b) => {
+                // Running timers with less time come first
+                if (a.timer.running && b.timer.running) {
+                    return a.timer.remaining - b.timer.remaining;
+                }
+                // Running timers come before paused ones
+                if (a.timer.running && !b.timer.running) return -1;
+                if (!a.timer.running && b.timer.running) return 1;
+                // For paused timers, sort by remaining time
+                return a.timer.remaining - b.timer.remaining;
+            });
+            sortedTimers.forEach(({timer, idx}) => {
                 const div = document.createElement('div');
                 div.style.background = '#23283a';
                 div.style.borderRadius = '8px';
@@ -246,12 +265,21 @@
                 div.style.boxShadow = '0 2px 8px #0004';
                 div.style.boxSizing = 'border-box';
 
+                // Add icon if timer has one
+                if (timer.icon) {
+                    const icon = document.createElement('span');
+                    icon.textContent = timer.icon;
+                    icon.style.fontSize = '1.8rem';
+                    icon.style.flexShrink = '0';
+                    div.appendChild(icon);
+                }
+
                 const name = document.createElement('span');
                 name.textContent = timer.name || 'Timer';
                 name.style.fontWeight = 'bold';
                 name.style.fontSize = '1.2rem';
-                name.style.minWidth = '90px';
-                name.style.maxWidth = '200px';
+                name.style.minWidth = '120px';
+                name.style.maxWidth = '350px';
                 name.style.overflow = 'hidden';
                 name.style.textOverflow = 'ellipsis';
                 name.style.whiteSpace = 'nowrap';
@@ -280,6 +308,17 @@
                 startBtn.style.cursor = 'pointer';
                 startBtn.onclick = () => toggleTimer(idx);
 
+                const resetBtn = document.createElement('button');
+                resetBtn.textContent = 'Reset';
+                resetBtn.style.marginLeft = '10px';
+                resetBtn.style.padding = '6px 12px';
+                resetBtn.style.background = '#ff9800';
+                resetBtn.style.color = '#fff';
+                resetBtn.style.border = 'none';
+                resetBtn.style.borderRadius = '5px';
+                resetBtn.style.cursor = 'pointer';
+                resetBtn.onclick = () => resetTimer(idx);
+
                 const removeBtn = document.createElement('button');
                 removeBtn.textContent = 'Remove';
                 removeBtn.style.marginLeft = '10px';
@@ -291,10 +330,12 @@
                 removeBtn.style.cursor = 'pointer';
                 removeBtn.onclick = () => removeTimer(idx);
 
+                // Append remaining elements (icon already appended if it exists)
                 div.appendChild(name);
                 div.appendChild(spacer);
                 div.appendChild(time);
                 div.appendChild(startBtn);
+                div.appendChild(resetBtn);
                 div.appendChild(removeBtn);
                 timersList.appendChild(div);
             });
@@ -362,6 +403,18 @@
             renderTimers();
         }
 
+        function resetTimer(idx) {
+            const timer = timers[idx];
+            if (timer.interval) clearInterval(timer.interval);
+            timer.remaining = timer.total;
+            timer.running = false;
+            timer.started = false;
+            timer.endTime = null;
+            timer.lastPaused = null;
+            saveTimers();
+            renderTimers();
+        }
+
         function toggleTimer(idx) {
             const timer = timers[idx];
             if (timer.running) {
@@ -421,14 +474,18 @@
                 alert('Please enter a valid time.');
                 return;
             }
+            const icon = timerNameInput.dataset.icon || '';
             timers.push({
                 name,
+                icon,
                 total: totalSeconds,
                 remaining: totalSeconds,
                 running: false,
                 started: false,
                 interval: null
             });
+            // Clear the icon data attribute
+            timerNameInput.dataset.icon = '';
             saveTimers();
             renderTimers();
             // Automatically start the new timer
