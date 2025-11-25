@@ -10,48 +10,93 @@
 </head>
 <body>
     <div id="header"></div>
-    <main class="center-container glass-bg">
-        <h1>Flash Cards</h1>
-        <div id="set-controls" style="margin-bottom:18px;text-align:center;">
-            <label for="set-select" style="font-weight:600;">Set:</label>
-            <select id="set-select" style="margin:0 8px 0 4px;padding:4px 8px;font-size:1rem;"></select>
-            <button id="delete-set-btn" class="main-btn" style="background:#d32f2f;padding:4px 12px;font-size:0.95rem;">Delete Set</button>
-            <input id="new-set-name" type="text" placeholder="New set name" style="margin-left:12px;padding:4px 8px;font-size:1rem;width:120px;">
-            <button id="add-set-btn" class="main-btn" style="padding:4px 12px;font-size:0.95rem;">Add Set</button>
+    <main class="flashcard-main">
+        <h1 style="text-align: center; margin-bottom: 40px;">Flash Cards</h1>
+        
+        <div id="set-controls" class="flashcard-set-controls">
+            <label for="set-select">Set:</label>
+            <select id="set-select"></select>
+            <button id="delete-set-btn" class="flashcard-btn flashcard-btn-danger">Delete Set</button>
+            <input id="new-set-name" type="text" placeholder="New set name">
+            <button id="add-set-btn" class="flashcard-btn">Add Set</button>
         </div>
-        <div id="flashcard-box" style="width:100%;max-width:400px;margin:0 auto 24px auto;text-align:center;">
-            <div id="flashcard-question" style="font-size:1.3rem;font-weight:600;margin-bottom:18px;"></div>
-            <button id="show-answer-btn" class="main-btn" style="margin-bottom:12px;">Show Answer</button>
-            <div id="flashcard-answer" style="font-size:1.15rem;color:#b3c6ff;margin-bottom:18px;display:none;"></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:18px;">
-                <button id="prev-btn" class="main-btn" style="flex:1;margin-right:8px;">Previous</button>
-                <button id="next-btn" class="main-btn" style="flex:1;margin-left:8px;">Next</button>
+
+        <div class="flashcard-viewer">
+            <button id="prev-btn" class="flashcard-arrow flashcard-arrow-left" title="Previous Card">
+                <span>❮</span>
+            </button>
+
+            <div class="flashcard-container">
+                <div id="flashcard" class="flashcard">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <div class="flashcard-content" id="flashcard-question">No flashcards available.</div>
+                            <div class="flashcard-hint">Click to reveal answer</div>
+                        </div>
+                        <div class="flashcard-back">
+                            <div class="flashcard-content" id="flashcard-answer">Answer</div>
+                            <div class="flashcard-hint">Click to see question</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flashcard-counter" id="flashcard-counter">0 / 0</div>
             </div>
-            <button id="delete-btn" class="main-btn" style="background:#d32f2f;">Delete This Card</button>
+
+            <button id="next-btn" class="flashcard-arrow flashcard-arrow-right" title="Next Card">
+                <span>❯</span>
+            </button>
+        </div>
+
+        <div class="flashcard-actions">
+            <button id="shuffle-btn" class="flashcard-btn" style="margin-right: 12px;">🔀 Shuffle Cards</button>
+            <button id="delete-btn" class="flashcard-btn flashcard-btn-danger">Delete This Card</button>
         </div>
     </main>
     <div id="global-timer-bar"></div>
 
-    <section class="center-container glass-bg" style="margin-top:32px;max-width:420px;">
-        <form id="add-flashcard-form" style="text-align:center;">
-            <h2 style="font-size:1.2rem;margin-bottom:10px;">Add a New Flashcard</h2>
-            <input id="new-question" type="text" placeholder="Question" required style="width:90%;margin-bottom:8px;padding:8px;">
-            <input id="new-answer" type="text" placeholder="Answer" required style="width:90%;margin-bottom:8px;padding:8px;">
-            <button type="submit" class="main-btn" style="margin-top:8px;">Add Flashcard</button>
-        </form>
-        <div id="flashcard-msg" style="margin-top:18px;color:#ffb13a;"></div>
-        <script>
+    <section class="flashcard-create-section">
+        <div class="create-container">
+            <h2 class="create-title">✨ Create Flashcards</h2>
+            <p class="create-description">Add new cards to your current set</p>
+            
+            <form id="add-flashcard-form" class="create-form">
+                <div class="form-group">
+                    <label for="new-question" class="form-label">Question</label>
+                    <textarea id="new-question" placeholder="Enter your question..." required rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-answer" class="form-label">Answer</label>
+                    <textarea id="new-answer" placeholder="Enter the answer..." required rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="create-submit">
+                    <span class="btn-icon">➕</span>
+                    Add Flashcard
+                </button>
+            </form>
+            
+            <div id="flashcard-msg" class="create-message"></div>
+        </div>
+    </section>
+    
+    <script>
         let sets = [];
         let defaultSets = [];
+        let defaultFlashcardsData = {}; // Store default flashcards in memory
         let currentSet = '';
         let flashcards = [];
         let currentIdx = 0;
+        let isFlipped = false;
+        let isAnimating = false;
         const questionDiv = document.getElementById('flashcard-question');
         const answerDiv = document.getElementById('flashcard-answer');
-        const showAnswerBtn = document.getElementById('show-answer-btn');
+        const flashcard = document.getElementById('flashcard');
+        const flashcardCounter = document.getElementById('flashcard-counter');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const deleteBtn = document.getElementById('delete-btn');
+        const shuffleBtn = document.getElementById('shuffle-btn');
         const addForm = document.getElementById('add-flashcard-form');
         const newQ = document.getElementById('new-question');
         const newA = document.getElementById('new-answer');
@@ -62,16 +107,31 @@
         const deleteSetBtn = document.getElementById('delete-set-btn');
 
         function getSets() {
+            let customSets = [];
             let s = localStorage.getItem('flashcardSets');
             if (s) {
-                try { return JSON.parse(s); } catch { return []; }
+                try { customSets = JSON.parse(s); } catch { customSets = []; }
             }
-            return [];
+            // Always include default sets and filter out duplicates
+            let allSets = [...defaultSets];
+            customSets.forEach(set => {
+                if (!defaultSets.includes(set)) {
+                    allSets.push(set);
+                }
+            });
+            return allSets;
         }
         function saveSets() {
-            localStorage.setItem('flashcardSets', JSON.stringify(sets));
+            // Only save custom sets, not default ones
+            let customSets = sets.filter(s => !defaultSets.includes(s));
+            localStorage.setItem('flashcardSets', JSON.stringify(customSets));
         }
         function getFlashcardsForSet(set) {
+            // Check if it's a default set first
+            if (defaultFlashcardsData[set]) {
+                return defaultFlashcardsData[set];
+            }
+            // Otherwise load from localStorage
             let fc = localStorage.getItem('flashcards_' + set);
             if (fc) {
                 try { return JSON.parse(fc); } catch { return []; }
@@ -79,6 +139,10 @@
             return [];
         }
         function saveFlashcardsForSet(set, cards) {
+            // Don't save default sets to localStorage
+            if (isDefaultSet(set)) {
+                return;
+            }
             localStorage.setItem('flashcards_' + set, JSON.stringify(cards));
         }
 
@@ -99,6 +163,8 @@
             currentIdx = 0;
             renderSetSelect();
             renderFlashcard();
+            // Update delete set button state
+            deleteSetBtn.disabled = isDefaultSet(currentSet);
         }
 
         function addSet() {
@@ -112,13 +178,6 @@
         }
 
         function isDefaultSet(setName) {
-            if (defaultSets.length === 0) {
-                // Try to load from localStorage if not already loaded
-                let d = localStorage.getItem('defaultFlashcardSets');
-                if (d) {
-                    try { defaultSets = JSON.parse(d); } catch { defaultSets = []; }
-                }
-            }
             return defaultSets.includes(setName);
         }
 
@@ -143,10 +202,14 @@
         }
 
         function renderFlashcard() {
+            // Reset flip state
+            isFlipped = false;
+            flashcard.classList.remove('flipped');
+            
             if (!currentSet) {
                 questionDiv.textContent = 'No set selected.';
-                answerDiv.style.display = 'none';
-                showAnswerBtn.style.display = 'none';
+                answerDiv.textContent = '';
+                flashcardCounter.textContent = '0 / 0';
                 prevBtn.disabled = true;
                 nextBtn.disabled = true;
                 deleteBtn.disabled = true;
@@ -154,8 +217,8 @@
             }
             if (flashcards.length === 0) {
                 questionDiv.textContent = 'No flashcards available.';
-                answerDiv.style.display = 'none';
-                showAnswerBtn.style.display = 'none';
+                answerDiv.textContent = '';
+                flashcardCounter.textContent = '0 / 0';
                 prevBtn.disabled = true;
                 nextBtn.disabled = true;
                 deleteBtn.disabled = true;
@@ -164,34 +227,77 @@
             const card = flashcards[currentIdx];
             questionDiv.textContent = card.question;
             answerDiv.textContent = card.answer;
-            answerDiv.style.display = 'none';
-            showAnswerBtn.style.display = '';
+            flashcardCounter.textContent = `${currentIdx + 1} / ${flashcards.length}`;
             prevBtn.disabled = (currentIdx === 0);
             nextBtn.disabled = (currentIdx === flashcards.length - 1);
-            deleteBtn.disabled = false;
+            // Disable delete button for default sets
+            deleteBtn.disabled = isDefaultSet(currentSet);
+            deleteSetBtn.disabled = isDefaultSet(currentSet);
         }
 
-        function showAnswer() {
-            answerDiv.style.display = '';
-            showAnswerBtn.style.display = 'none';
+        function toggleFlip() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                flashcard.classList.add('flipped');
+            } else {
+                flashcard.classList.remove('flipped');
+            }
         }
 
         function nextCard() {
-            if (currentIdx < flashcards.length - 1) {
-                currentIdx++;
-                renderFlashcard();
+            if (currentIdx < flashcards.length - 1 && !isAnimating) {
+                isAnimating = true;
+                flashcard.classList.add('slide-out-left');
+                setTimeout(() => {
+                    currentIdx++;
+                    renderFlashcard();
+                    flashcard.classList.remove('slide-out-left');
+                    flashcard.classList.add('slide-in-right');
+                    setTimeout(() => {
+                        flashcard.classList.remove('slide-in-right');
+                        isAnimating = false;
+                    }, 400);
+                }, 400);
             }
         }
 
         function prevCard() {
-            if (currentIdx > 0) {
-                currentIdx--;
-                renderFlashcard();
+            if (currentIdx > 0 && !isAnimating) {
+                isAnimating = true;
+                flashcard.classList.add('slide-out-right');
+                setTimeout(() => {
+                    currentIdx--;
+                    renderFlashcard();
+                    flashcard.classList.remove('slide-out-right');
+                    flashcard.classList.add('slide-in-left');
+                    setTimeout(() => {
+                        flashcard.classList.remove('slide-in-left');
+                        isAnimating = false;
+                    }, 400);
+                }, 400);
             }
+        }
+
+        function shuffleCards() {
+            if (flashcards.length <= 1) return;
+            // Fisher-Yates shuffle algorithm
+            for (let i = flashcards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+            }
+            currentIdx = 0;
+            saveFlashcardsForSet(currentSet, flashcards);
+            renderFlashcard();
+            msgDiv.textContent = 'Cards shuffled!';
+            setTimeout(() => { msgDiv.textContent = ''; }, 1500);
         }
 
         function deleteCard() {
             if (flashcards.length === 0) return;
+            if (isDefaultSet(currentSet)) {
+                alert('You cannot delete cards from a default set.');
+                return;
+            }
             flashcards.splice(currentIdx, 1);
             if (currentIdx >= flashcards.length) currentIdx = flashcards.length - 1;
             saveFlashcardsForSet(currentSet, flashcards);
@@ -201,14 +307,24 @@
         addSetBtn.onclick = addSet;
         deleteSetBtn.onclick = deleteSet;
         setSelect.onchange = function() { switchSet(setSelect.value); };
-        showAnswerBtn.onclick = showAnswer;
+        flashcard.onclick = toggleFlip;
         prevBtn.onclick = prevCard;
         nextBtn.onclick = nextCard;
+        shuffleBtn.onclick = shuffleCards;
         deleteBtn.onclick = deleteCard;
 
         addForm.onsubmit = function(e) {
             e.preventDefault();
             if (!currentSet) return;
+            if (isDefaultSet(currentSet)) {
+                msgDiv.textContent = '⚠️ Cannot add cards to default sets!';
+                msgDiv.style.color = '#ff6b6b';
+                setTimeout(() => { 
+                    msgDiv.textContent = ''; 
+                    msgDiv.style.color = '';
+                }, 2000);
+                return;
+            }
             const q = newQ.value.trim();
             const a = newA.value.trim();
             if (!q || !a) return;
@@ -219,42 +335,43 @@
             newQ.value = '';
             newA.value = '';
             msgDiv.textContent = 'Flashcard added!';
-            setTimeout(() => { msgDiv.textContent = ''; }, 1200);
+            msgDiv.style.color = '#4ade80';
+            setTimeout(() => { 
+                msgDiv.textContent = ''; 
+                msgDiv.style.color = '';
+            }, 1200);
         };
 
-        // Initial load
-        sets = getSets();
-        if (sets.length > 0) {
-            // Try to load defaultSets from localStorage
-            let d = localStorage.getItem('defaultFlashcardSets');
-            if (d) {
-                try { defaultSets = JSON.parse(d); } catch { defaultSets = []; }
-            }
-            switchSet(sets[0]);
-        } else {
-            // Load default sets/cards from JSON file if no sets exist
-            fetch('json/flashcard_sets.json')
-                .then(res => res.json())
-                .then(data => {
-                    sets = Object.keys(data);
-                    defaultSets = [...sets];
-                    saveSets();
-                    localStorage.setItem('defaultFlashcardSets', JSON.stringify(defaultSets));
-                    for (const setName in data) {
-                        saveFlashcardsForSet(setName, data[setName]);
-                    }
+        // Initial load - always load default sets from JSON
+        fetch('json/flashcard_sets.json')
+            .then(res => res.json())
+            .then(data => {
+                // Store default data in memory
+                defaultSets = Object.keys(data);
+                defaultFlashcardsData = data;
+                
+                // Get all sets (default + custom)
+                sets = getSets();
+                
+                // Switch to first available set
+                if (sets.length > 0) {
                     switchSet(sets[0]);
-                })
-                .catch(() => {
-                    // fallback: create empty default set
+                } else {
+                    // Fallback if something goes wrong
+                    sets = [...defaultSets];
+                    switchSet(sets[0]);
+                }
+            })
+            .catch(() => {
+                // Fallback: create empty default set
+                defaultSets = ['Default'];
+                defaultFlashcardsData = {'Default': []};
+                sets = getSets();
+                if (sets.length === 0) {
                     sets = ['Default'];
-                    defaultSets = ['Default'];
-                    saveSets();
-                    localStorage.setItem('defaultFlashcardSets', JSON.stringify(defaultSets));
-                    saveFlashcardsForSet('Default', []);
-                    switchSet('Default');
-                });
-        }
+                }
+                switchSet(sets[0]);
+            });
         </script>
     </section>
     <script src="timer-bar.js" defer></script>

@@ -6,6 +6,147 @@
     <title>Map Quiz</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/x-icon" href="images/logo.png">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #interactive-map {
+            height: 600px;
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+        .leaflet-container {
+            background: #1e2a4a;
+            border-radius: 12px;
+        }
+        .custom-marker {
+            background: #ff2222;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .custom-marker.highlight {
+            background: #2e7d32;
+            width: 24px !important;
+            height: 24px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+        }
+        .map-control-btn {
+            background: rgba(35, 40, 58, 0.95);
+            border: 2px solid rgba(58, 122, 254, 0.4);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .map-control-btn:hover {
+            background: #3a7afe;
+            transform: translateY(-2px);
+        }
+        .custom-tooltip {
+            background: rgba(35, 40, 58, 0.95);
+            border: 2px solid rgba(58, 122, 254, 0.4);
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 6px 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .custom-tooltip::before {
+            border-top-color: rgba(58, 122, 254, 0.4);
+        }
+        .leaflet-tooltip-top::before {
+            border-top-color: rgba(35, 40, 58, 0.95);
+        }
+        /* Hide Leaflet attribution */
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        /* Map selection dropdown styling */
+        #map-select {
+            background: linear-gradient(135deg, rgba(35, 40, 58, 0.9) 0%, rgba(58, 122, 254, 0.3) 100%);
+            color: #fff;
+            border: 2px solid rgba(58, 122, 254, 0.4);
+            border-radius: 12px;
+            padding: 14px 40px 14px 20px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(58, 122, 254, 0.2);
+            transition: all 0.3s ease;
+            outline: none;
+            cursor: pointer;
+            min-width: 250px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+        #map-select:hover {
+            background: linear-gradient(135deg, rgba(58, 122, 254, 0.5) 0%, rgba(58, 122, 254, 0.7) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(58, 122, 254, 0.4);
+            border-color: #3a7afe;
+        }
+        #map-select:focus {
+            border-color: #3a7afe;
+            box-shadow: 0 0 0 4px rgba(58, 122, 254, 0.15);
+        }
+        #map-select option {
+            background: #1e2a4a;
+            color: #fff;
+            padding: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+        #map-select option:hover {
+            background: #3a7afe;
+        }
+        #map-select option:checked {
+            background: linear-gradient(135deg, #3a7afe 0%, #5a9aff 100%);
+            font-weight: 700;
+        }
+        #map-selection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, rgba(58, 122, 254, 0.08) 0%, rgba(35, 40, 58, 0.6) 100%);
+            border: 2px solid rgba(58, 122, 254, 0.25);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 0 auto 30px;
+            max-width: 900px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        #map-selection label {
+            color: #7bb6ff;
+            font-size: 1.2rem;
+            text-shadow: 0 2px 8px rgba(58, 122, 254, 0.3);
+        }
+    </style>
 </head>
 <body>
     <div id="header"></div>
@@ -19,18 +160,22 @@
         </div>
 
         <!-- Map selection -->
-        <div id="map-selection" style="margin-bottom: 20px;">
-            <label for="map-select" style="font-weight:700; color:#3a7afe; font-size:1.08rem;">Select Map:</label>
-            <select id="map-select" style="margin:0 8px; padding:8px 16px; font-size:1.1rem;">
+        <div id="map-selection">
+            <label for="map-select">Select Map:</label>
+            <select id="map-select">
                 <option value="">-- Choose a Map --</option>
             </select>
-            <button id="new-map-btn" class="main-btn" style="padding:8px 16px; font-size:0.95rem;">Create New Map</button>
+            <button id="new-world-map-btn" class="main-btn" style="padding:10px 20px; font-size:1rem;">📍 Create New Map</button>
         </div>
 
         <!-- Map container -->
-        <div id="map-container" style="position:relative; max-width:800px; width:100%; margin:20px auto; display:none;">
-            <img id="map-image" src="" alt="Map" style="width:100%; height:auto; border-radius:12px; box-shadow:0 4px 12px #0004;">
-            <div id="map-pins"></div>
+        <div id="map-container" style="position:relative; width:100%; margin:20px auto; display:none;">
+            <div class="map-controls" style="margin-bottom: 10px; position: relative; top: 0; right: 0;">
+                <button id="zoom-in-btn" class="map-control-btn">🔍 Zoom In</button>
+                <button id="zoom-out-btn" class="map-control-btn">🔎 Zoom Out</button>
+                <button id="reset-view-btn" class="map-control-btn">↺ Reset View</button>
+            </div>
+            <div id="interactive-map"></div>
         </div>
 
         <!-- Quiz controls -->
@@ -57,15 +202,10 @@
             <h3>Edit Map</h3>
             <div style="margin-bottom:15px;">
                 <label for="map-name-input" style="font-weight:600;">Map Name:</label>
-                <input type="text" id="map-name-input" placeholder="Enter map name" style="width:90%; max-width:400px; margin:8px 0;">
+                <input type="text" id="map-name-input" placeholder="e.g., Global Fleet AORs, PACOM Region" style="width:90%; max-width:400px; margin:8px 0;">
             </div>
             <div style="margin-bottom:15px;">
-                <label for="map-image-input" style="font-weight:600;">Map Image URL:</label>
-                <input type="text" id="map-image-input" placeholder="Enter image URL" style="width:90%; max-width:400px; margin:8px 0;">
-                <button id="load-image-btn" class="main-btn" style="padding:8px 16px; font-size:0.9rem; margin-left:8px;">Load Image</button>
-            </div>
-            <div style="margin-bottom:15px;">
-                <p style="color:#b3c6ff;">Click on the map to add labeled points</p>
+                <p style="color:#b3c6ff; font-size:1.05rem;">🌍 <strong>Pan, zoom, and click</strong> on the world map to mark locations</p>
             </div>
             <div style="margin-bottom:15px;">
                 <button id="save-map-btn" class="main-btn" style="padding:10px 24px; background:#3a7afe;">Save Map</button>
@@ -101,6 +241,10 @@
         let currentQuestionIndex = 0;
         let score = 0;
         let answeredQuestions = [];
+        let leafletMap = null;
+        let markers = [];
+        let imageOverlay = null;
+        let isWorldMap = false;
         
         // Load default maps from JSON
         function loadDefaultMaps() {
@@ -146,14 +290,59 @@
             });
         }
         
+        // Initialize Leaflet map
+        function initializeLeafletMap() {
+            if (leafletMap) {
+                leafletMap.remove();
+            }
+            
+            // Create real world map with OpenStreetMap tiles
+            // Use custom initial view if provided, otherwise default to world view
+            const initialCenter = currentMap.initialCenter || [20, 0];
+            const initialZoom = currentMap.initialZoom || 2;
+            
+            leafletMap = L.map('interactive-map', {
+                center: initialCenter,
+                zoom: initialZoom,
+                minZoom: 2,
+                maxZoom: 18,
+                zoomControl: false
+            });
+            
+            // Add OpenStreetMap tile layer without labels (using Carto Positron No Labels)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors, © CARTO',
+                maxZoom: 18,
+                subdomains: 'abcd'
+            }).addTo(leafletMap);
+            
+            // Render markers
+            renderWorldMapMarkers();
+            
+            // Add click handler for edit mode
+            if (editMode) {
+                leafletMap.on('click', function(e) {
+                    const label = prompt('Enter label for this location (e.g., "5th Fleet AOR", "CENTCOM", "Strait of Hormuz"):');
+                    if (label) {
+                        currentMap.points.push({ 
+                            lat: e.latlng.lat, 
+                            lng: e.latlng.lng, 
+                            label: label 
+                        });
+                        renderWorldMapMarkers();
+                        renderPointsList();
+                    }
+                });
+            }
+        }
+        
         // Display selected map
         function displayMap(mapIndex) {
             currentMap = maps[mapIndex];
             if (!currentMap) return;
             
-            $('#map-image').attr('src', currentMap.imageUrl);
             $('#map-container').show();
-            renderPins();
+            initializeLeafletMap();
             
             if (quizMode) {
                 startQuiz();
@@ -163,64 +352,49 @@
             }
         }
         
-        // Render pins on map
-        function renderPins() {
-            const pinsContainer = $('#map-pins');
-            pinsContainer.empty();
+        // Render markers on world map
+        function renderWorldMapMarkers() {
+            if (!leafletMap || !currentMap || !currentMap.points) return;
             
-            if (!currentMap || !currentMap.points) return;
+            // Clear existing markers
+            markers.forEach(m => leafletMap.removeLayer(m));
+            markers = [];
             
             currentMap.points.forEach((point, idx) => {
-                const pin = $('<div class="map-pin"></div>');
-                pin.css({
-                    position: 'absolute',
-                    left: point.x + '%',
-                    top: point.y + '%',
-                    width: '24px',
-                    height: '24px',
-                    background: '#ff2222',
-                    border: '3px solid #fff',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px #0008',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10
+                // Create custom icon
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
                 });
+                
+                // Create marker at lat/lng
+                const marker = L.marker([point.lat, point.lng], { icon: icon });
                 
                 // Show label in practice mode
                 if (!quizMode && !editMode) {
-                    const label = $(`<div class="map-label">${point.label}</div>`);
-                    label.css({
-                        position: 'absolute',
-                        left: point.x + '%',
-                        top: (point.y - 5) + '%',
-                        transform: 'translate(-50%, -100%)',
-                        background: '#23283a',
-                        color: '#fff',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        fontSize: '0.9rem',
-                        fontWeight: '600',
-                        whiteSpace: 'nowrap',
-                        boxShadow: '0 2px 8px #0008',
-                        zIndex: 11
+                    marker.bindTooltip(point.label, {
+                        permanent: true,
+                        direction: 'top',
+                        offset: [0, -12],
+                        className: 'custom-tooltip'
                     });
-                    pinsContainer.append(label);
                 }
                 
                 // Click to remove in edit mode
                 if (editMode) {
-                    pin.on('click', function(e) {
-                        e.stopPropagation();
+                    marker.on('click', function(e) {
+                        L.DomEvent.stopPropagation(e);
                         if (confirm(`Remove point "${point.label}"?`)) {
                             currentMap.points.splice(idx, 1);
-                            renderPins();
+                            renderWorldMapMarkers();
                             renderPointsList();
                         }
                     });
                 }
                 
-                pinsContainer.append(pin);
+                marker.addTo(leafletMap);
+                markers.push(marker);
             });
         }
         
@@ -262,30 +436,40 @@
         
         // Highlight specific pin
         function highlightPin(point) {
-            const pinsContainer = $('#map-pins');
-            pinsContainer.empty();
+            if (!leafletMap) return;
+            
+            // Clear existing markers
+            markers.forEach(m => leafletMap.removeLayer(m));
+            markers = [];
+            
+            let targetMarkerAdded = false;
             
             currentMap.points.forEach((p) => {
-                const pin = $('<div class="map-pin"></div>');
-                const isTarget = (p.x === point.x && p.y === point.y && p.label === point.label);
+                // Use label as unique identifier since it's more reliable
+                const isTarget = (p.label === point.label);
                 
-                pin.css({
-                    position: 'absolute',
-                    left: p.x + '%',
-                    top: p.y + '%',
-                    width: isTarget ? '32px' : '24px',
-                    height: isTarget ? '32px' : '24px',
-                    background: isTarget ? '#ffff00' : '#ff2222',
-                    border: '3px solid #fff',
-                    borderRadius: '50%',
-                    cursor: 'default',
-                    boxShadow: isTarget ? '0 0 20px #ffff0088' : '0 2px 8px #0008',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: isTarget ? 20 : 10,
-                    animation: isTarget ? 'pulse 1.5s infinite' : 'none'
+                // Keep same size for all markers, just change color
+                const icon = L.divIcon({
+                    className: isTarget ? 'custom-marker highlight' : 'custom-marker',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
                 });
                 
-                pinsContainer.append(pin);
+                const marker = L.marker([p.lat, p.lng], { icon: icon });
+                marker.addTo(leafletMap);
+                markers.push(marker);
+                
+                if (isTarget && !targetMarkerAdded) {
+                    targetMarkerAdded = true;
+                    // Pan to highlighted marker, keeping initial zoom
+                    const targetZoom = currentMap.initialZoom || 5;
+                    setTimeout(() => {
+                        leafletMap.setView([p.lat, p.lng], targetZoom, {
+                            animate: true,
+                            duration: 0.5
+                        });
+                    }, 100);
+                }
             });
         }
         
@@ -362,7 +546,6 @@
             } else {
                 currentMap = {
                     name: '',
-                    imageUrl: '',
                     points: []
                 };
             }
@@ -374,29 +557,10 @@
             $('#quiz-results').hide();
             
             $('#map-name-input').val(currentMap.name);
-            $('#map-image-input').val(currentMap.imageUrl);
-            
-            if (currentMap.imageUrl) {
-                $('#map-image').attr('src', currentMap.imageUrl);
-                $('#map-container').show();
-                renderPins();
-            }
+            $('#map-container').show();
+            initializeLeafletMap();
             
             renderPointsList();
-            
-            // Add click handler to map for adding points
-            $('#map-image').off('click').on('click', function(e) {
-                const rect = this.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-                
-                const label = prompt('Enter label for this point:');
-                if (label) {
-                    currentMap.points.push({ x: x, y: y, label: label });
-                    renderPins();
-                    renderPointsList();
-                }
-            });
         }
         
         function renderPointsList() {
@@ -404,14 +568,15 @@
             container.empty();
             
             if (!currentMap.points || currentMap.points.length === 0) {
-                container.html('<p style="color:#b3c6ff; font-style:italic;">No points added yet</p>');
+                container.html('<p style="color:#b3c6ff; font-style:italic;">No points added yet. Click on the map to add locations.</p>');
                 return;
             }
             
             currentMap.points.forEach((point, idx) => {
+                const coords = `(${point.lat.toFixed(2)}°, ${point.lng.toFixed(2)}°)`;
                 const pointDiv = $(`
                     <div style="background:#23283a; padding:8px 12px; margin:8px 0; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-                        <span><strong>${idx + 1}.</strong> ${point.label}</span>
+                        <span><strong>${idx + 1}.</strong> ${point.label} <small style="color:#b3c6ff;">${coords}</small></span>
                         <button class="remove-point-btn" data-idx="${idx}" style="background:#d32f2f; color:#fff; border:none; padding:4px 12px; border-radius:4px; cursor:pointer;">Remove</button>
                     </div>
                 `);
@@ -421,18 +586,24 @@
             $('.remove-point-btn').on('click', function() {
                 const idx = $(this).data('idx');
                 currentMap.points.splice(idx, 1);
-                renderPins();
+                renderWorldMapMarkers();
                 renderPointsList();
             });
         }
         
         function saveMap() {
             currentMap.name = $('#map-name-input').val().trim();
-            currentMap.imageUrl = $('#map-image-input').val().trim();
             
-            if (!currentMap.name || !currentMap.imageUrl) {
-                alert('Please provide both a map name and image URL!');
+            if (!currentMap.name) {
+                alert('Please provide a map name!');
                 return;
+            }
+            
+            // Save current map view as initial view
+            if (leafletMap) {
+                const center = leafletMap.getCenter();
+                currentMap.initialCenter = [center.lat, center.lng];
+                currentMap.initialZoom = leafletMap.getZoom();
             }
             
             if (currentMap.points.length === 0) {
@@ -488,7 +659,13 @@
             $('#quiz-mode-btn').removeClass('active');
             $('#quiz-controls').hide();
             $('#quiz-results').hide();
-            if (currentMap) renderPins();
+            if (currentMap && leafletMap) {
+                renderWorldMapMarkers();
+                // Reset to initial view
+                const initialCenter = currentMap.initialCenter || [20, 0];
+                const initialZoom = currentMap.initialZoom || 2;
+                leafletMap.setView(initialCenter, initialZoom);
+            }
         });
         
         $('#quiz-mode-btn').on('click', function() {
@@ -498,16 +675,24 @@
             if (currentMap) startQuiz();
         });
         
-        $('#new-map-btn').on('click', function() {
+        $('#new-world-map-btn').on('click', function() {
             enterEditMode();
         });
         
-        $('#load-image-btn').on('click', function() {
-            const url = $('#map-image-input').val().trim();
-            if (url) {
-                $('#map-image').attr('src', url);
-                $('#map-container').show();
-                currentMap.imageUrl = url;
+        // Map control buttons
+        $('#zoom-in-btn').on('click', function() {
+            if (leafletMap) leafletMap.zoomIn();
+        });
+        
+        $('#zoom-out-btn').on('click', function() {
+            if (leafletMap) leafletMap.zoomOut();
+        });
+        
+        $('#reset-view-btn').on('click', function() {
+            if (leafletMap && currentMap) {
+                const initialCenter = currentMap.initialCenter || [20, 0];
+                const initialZoom = currentMap.initialZoom || 2;
+                leafletMap.setView(initialCenter, initialZoom);
             }
         });
         

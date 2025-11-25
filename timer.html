@@ -24,9 +24,9 @@
             <div id="zuluDiff" class="zulu-offset">Difference: UTC ±0 hours</div>
         </div>
     <main class="center-container glass-bg">
-        <h1>Multi Timer</h1>
+        <h1 style="margin-bottom: 30px; font-size: 3.5rem; background: linear-gradient(135deg, #3a7afe 0%, #7bb6ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Multi Timer</h1>
         
-        <form id="newTimerForm" autocomplete="off" style="margin-bottom: 20px;">
+        <form id="newTimerForm" autocomplete="off" style="margin-bottom: 30px;">
                     <div class="preset-timers">
                         <button type="button" class="preset-btn" data-hours="0" data-minutes="30" data-seconds="0" data-icon="🚤" data-name="Boat Timer">🚤 Boat Timer (30 min)</button>
                         <button type="button" class="preset-btn" data-hours="0" data-minutes="15" data-seconds="0" data-icon="🚁" data-name="Heli Timer">🚁 Heli Timer (15 min)</button>
@@ -79,17 +79,8 @@
         <div id="timersList"></div>
 
     </main>
-    <!-- Flashing popup for timer end -->
-    <div id="timerPopup">
-        <div id="popupContent">
-            <span class="flashing">!</span>
-            <div id="popupMsg">Time is up!</div>
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
-                <button id="restartTimerBtn" style="padding: 12px 24px; font-size: 1.1rem; background: #3a7afe; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Restart Timer</button>
-                <button id="stopTimerBtn" style="padding: 12px 24px; font-size: 1.1rem; background: #d32f2f; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Stop</button>
-            </div>
-        </div>
-    </div>
+    <!-- Flashing popup container for timer ends -->
+    <div id="timerPopupContainer"></div>
     <div id="global-timer-bar"></div>
     <audio id="timerAudio" src="audio/alarm.mp3" preload="auto"></audio>
     <script src="timer-bar.js" defer></script>
@@ -128,22 +119,40 @@
                                 // Preset timer buttons logic
                                 document.querySelectorAll('.preset-btn').forEach(btn => {
                                     btn.addEventListener('click', function() {
+                                        const timerTypeSelect = document.getElementById('timerType');
                                         const hours = document.getElementById('hours');
                                         const minutes = document.getElementById('minutes');
                                         const seconds = document.getElementById('seconds');
+                                        const clockTime = document.getElementById('clockTime');
                                         const timerName = document.getElementById('timerName');
-                                        hours.value = this.dataset.hours;
-                                        minutes.value = this.dataset.minutes;
-                                        seconds.value = this.dataset.seconds;
+                                        
                                         // Only set the name if input is empty
                                         if (!timerName.value.trim()) {
                                             timerName.value = this.dataset.name || '';
                                         }
                                         // Store the icon in a temporary attribute
                                         timerName.dataset.icon = this.dataset.icon || '';
-                                        hours.dispatchEvent(new Event('input', { bubbles: true }));
-                                        minutes.dispatchEvent(new Event('input', { bubbles: true }));
-                                        seconds.dispatchEvent(new Event('input', { bubbles: true }));
+                                        
+                                        if (timerTypeSelect.value === 'duration') {
+                                            // Duration mode: set hours, minutes, seconds
+                                            hours.value = this.dataset.hours;
+                                            minutes.value = this.dataset.minutes;
+                                            seconds.value = this.dataset.seconds;
+                                            hours.dispatchEvent(new Event('input', { bubbles: true }));
+                                            minutes.dispatchEvent(new Event('input', { bubbles: true }));
+                                            seconds.dispatchEvent(new Event('input', { bubbles: true }));
+                                        } else {
+                                            // Clock time mode: calculate target time based on duration
+                                            const now = new Date();
+                                            const durationHours = parseInt(this.dataset.hours) || 0;
+                                            const durationMinutes = parseInt(this.dataset.minutes) || 0;
+                                            const durationSeconds = parseInt(this.dataset.seconds) || 0;
+                                            const totalSeconds = durationHours * 3600 + durationMinutes * 60 + durationSeconds;
+                                            const targetTime = new Date(now.getTime() + totalSeconds * 1000);
+                                            const targetHours = targetTime.getHours().toString().padStart(2, '0');
+                                            const targetMinutes = targetTime.getMinutes().toString().padStart(2, '0');
+                                            clockTime.value = `${targetHours}:${targetMinutes}`;
+                                        }
                                     });
                                 });
                         // Custom up/down buttons for time inputs
@@ -253,17 +262,24 @@
             });
             sortedTimers.forEach(({timer, idx}) => {
                 const div = document.createElement('div');
+                div.className = 'timer-item';
                 div.style.background = '#23283a';
                 div.style.borderRadius = '8px';
                 div.style.padding = '12px 18px';
                 div.style.margin = '10px 0';
                 div.style.width = '100%';
-                div.style.maxWidth = '820px';
                 div.style.display = 'flex';
                 div.style.alignItems = 'center';
                 div.style.gap = '18px';
                 div.style.boxShadow = '0 2px 8px #0004';
                 div.style.boxSizing = 'border-box';
+                div.style.animation = 'slideInUp 0.4s ease-out';
+                div.style.transition = 'all 0.3s ease';
+                
+                // Add running class for glow animation
+                if (timer.running) {
+                    div.classList.add('running');
+                }
 
                 // Add icon if timer has one
                 if (timer.icon) {
@@ -341,38 +357,76 @@
             });
         }
 
-        let lastFinishedTimerIdx = null;
+        const activePopups = new Set();
+        
         function showTimerPopup(name, idx) {
+            // Don't show duplicate popups for the same timer
+            if (activePopups.has(idx)) return;
+            activePopups.add(idx);
+            
             var audio = document.getElementById('timerAudio');
             if (audio) { audio.currentTime = 0; audio.play(); }
-            popupMsg.innerHTML = `<b>${name}</b><br>Time is up!`;
-            timerPopup.classList.add('flashing-bg');
-            timerPopup.style.display = 'flex';
-            lastFinishedTimerIdx = idx;
+            
+            const container = document.getElementById('timerPopupContainer');
+            // Add flashing background to container
+            container.classList.add('flashing-bg');
+            
+            // Get the timer's icon if it has one
+            const timer = timers[idx];
+            const iconDisplay = timer && timer.icon ? timer.icon : '!';
+            
+            const popup = document.createElement('div');
+            popup.className = 'timer-popup';
+            popup.dataset.timerIdx = idx;
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <span class="flashing">${iconDisplay}</span>
+                    <div class="popup-msg"><b>${name}</b><br>Time is up!</div>
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button class="restart-timer-btn" style="padding: 12px 24px; font-size: 1.1rem; background: #3a7afe; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Restart Timer</button>
+                        <button class="stop-timer-btn" style="padding: 12px 24px; font-size: 1.1rem; background: #d32f2f; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Stop</button>
+                    </div>
+                </div>
+            `;
+            
+            popup.querySelector('.restart-timer-btn').addEventListener('click', () => restartTimer(idx, popup));
+            popup.querySelector('.stop-timer-btn').addEventListener('click', () => stopTimer(idx, popup));
+            
+            container.appendChild(popup);
         }
-        function hideTimerPopup() {
-            timerPopup.style.display = 'none';
-            timerPopup.classList.remove('flashing-bg');
-            var audio = document.getElementById('timerAudio');
-            if (audio) { audio.pause(); audio.currentTime = 0; }
+        
+        function hideTimerPopup(popup) {
+            const idx = parseInt(popup.dataset.timerIdx);
+            activePopups.delete(idx);
+            popup.remove();
+            
+            // Stop audio and remove flashing if no more popups
+            if (activePopups.size === 0) {
+                const container = document.getElementById('timerPopupContainer');
+                container.classList.remove('flashing-bg');
+                var audio = document.getElementById('timerAudio');
+                if (audio) { audio.pause(); audio.currentTime = 0; }
+            }
         }
-        function restartTimer() {
-            if (lastFinishedTimerIdx !== null && timers[lastFinishedTimerIdx]) {
-                let timer = timers[lastFinishedTimerIdx];
+        
+        function restartTimer(idx, popup) {
+            if (timers[idx]) {
+                let timer = timers[idx];
                 timer.remaining = timer.total;
                 timer.display = pad(Math.floor(timer.remaining/60)) + ':' + pad(timer.remaining%60);
                 timer.running = false;
                 timer.started = false;
+                timer.endTime = null;
                 saveTimers();
                 renderTimers();
-                toggleTimer(lastFinishedTimerIdx);
+                toggleTimer(idx);
             }
-            hideTimerPopup();
-            lastFinishedTimerIdx = null;
+            hideTimerPopup(popup);
         }
-        function stopTimer() {
-            if (lastFinishedTimerIdx !== null && timers[lastFinishedTimerIdx]) {
-                let timer = timers[lastFinishedTimerIdx];
+        
+        function stopTimer(idx, popup) {
+            if (timers[idx]) {
+                let timer = timers[idx];
                 timer.remaining = timer.total;
                 timer.running = false;
                 timer.started = false;
@@ -380,11 +434,8 @@
                 saveTimers();
                 renderTimers();
             }
-            hideTimerPopup();
-            lastFinishedTimerIdx = null;
+            hideTimerPopup(popup);
         }
-        document.getElementById('restartTimerBtn').addEventListener('click', restartTimer);
-        document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
 
         timerType.addEventListener('change', function() {
             if (this.value === 'duration') {

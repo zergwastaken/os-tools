@@ -29,10 +29,67 @@
         { "question": "What is the NATO phonetic for 'Z'?", "answer": "Zulu" }
     ],
 
-    "Math Basics": [
-        { "question": "What is 2 + 2?", "answer": "4" },
-        { "question": "What is 5 x 3?", "answer": "15" },
-        { "question": "What is the square root of 9?", "answer": "3" }
+    "Enlisted Ranks": [
+        { "question": "What is the title for E-1?", "answer": "Seaman Recruit" },
+        { "question": "What is the title for E-2?", "answer": "Seaman Apprentice" },
+        { "question": "What is the title for E-3?", "answer": "Seaman" },
+        { "question": "What is the title for E-4?", "answer": "Petty Officer Third Class" },
+        { "question": "What is the title for E-5?", "answer": "Petty Officer Second Class" },
+        { "question": "What is the title for E-6?", "answer": "Petty Officer First Class" },
+        { "question": "What is the title for E-7?", "answer": "Chief Petty Officer" },
+        { "question": "What is the title for E-8?", "answer": "Senior Chief Petty Officer" },
+        { "question": "What is the title for E-9?", "answer": "Master Chief Petty Officer" }
+    ],
+
+    "Officer Ranks": [
+        { "question": "What is the title for O-1?", "answer": "Ensign" },
+        { "question": "What is the title for O-2?", "answer": "Lieutenant Junior Grade" },
+        { "question": "What is the title for O-3?", "answer": "Lieutenant" },
+        { "question": "What is the title for O-4?", "answer": "Lieutenant Commander" },
+        { "question": "What is the title for O-5?", "answer": "Commander" },
+        { "question": "What is the title for O-6?", "answer": "Captain" },
+        { "question": "What is the title for O-7?", "answer": "Rear Admiral Lower Half" },
+        { "question": "What is the title for O-8?", "answer": "Rear Admiral Upper Half" },
+        { "question": "What is the title for O-9?", "answer": "Vice Admiral" },
+        { "question": "What is the title for O-10?", "answer": "Admiral" }
+    ],
+
+    "Maritime Flags": [
+        { "question": "What is the meaning of the 'A' (Alpha) flag?", "answer": "I have a diver down; keep well clear at slow speed." },
+        { "question": "What is the meaning of the 'B' (Bravo) flag?", "answer": "I am taking in, discharging, or carrying dangerous goods." },
+        { "question": "What is the meaning of the 'C' (Charlie) flag?", "answer": "Yes / Affirmative." },
+        { "question": "What is the meaning of the 'D' (Delta) flag?", "answer": "Keep clear of me; I am maneuvering with difficulty." },
+        { "question": "What is the meaning of the 'E' (Echo) flag?", "answer": "I am altering my course to starboard." },
+        { "question": "What is the meaning of the 'F' (Foxtrot) flag?", "answer": "I am disabled; communicate with me." },
+        { "question": "What is the meaning of the 'G' (Golf) flag?", "answer": "I require a pilot." },
+        { "question": "What is the meaning of the 'H' (Hotel) flag?", "answer": "I have a pilot on board." },
+        { "question": "What is the meaning of the 'I' (India) flag?", "answer": "I am altering my course to port." },
+        { "question": "What is the meaning of the 'J' (Juliett) flag?", "answer": "I am on fire and have dangerous cargo; keep clear." },
+        { "question": "What is the meaning of the 'K' (Kilo) flag?", "answer": "I wish to communicate with you." },
+        { "question": "What is the meaning of the 'L' (Lima) flag?", "answer": "You should stop your vessel immediately." },
+        { "question": "What is the meaning of the 'M' (Mike) flag?", "answer": "My vessel is stopped and making no way through the water." },
+        { "question": "What is the meaning of the 'N' (November) flag?", "answer": "No / Negative." },
+        { "question": "What is the meaning of the 'O' (Oscar) flag?", "answer": "Man overboard." },
+        { "question": "What is the meaning of the 'P' (Papa) flag?", "answer": "All persons should report on board; the vessel is about to proceed to sea." },
+        { "question": "What is the meaning of the 'Q' (Quebec) flag?", "answer": "My vessel is healthy and I request free pratique." },
+        { "question": "What is the meaning of the 'R' (Romeo) flag?", "answer": "Preparing to replenish (at sea) / Ready duty ship." },
+        { "question": "What is the meaning of the 'S' (Sierra) flag?", "answer": "I am operating astern propulsion." },
+        { "question": "What is the meaning of the 'T' (Tango) flag?", "answer": "Keep clear of me; I am engaged in pair trawling." },
+        { "question": "What is the meaning of the 'U' (Uniform) flag?", "answer": "You are running into danger." },
+        { "question": "What is the meaning of the 'V' (Victor) flag?", "answer": "I require assistance." },
+        { "question": "What is the meaning of the 'W' (Whiskey) flag?", "answer": "I require medical assistance." },
+        { "question": "What is the meaning of the 'X' (X-ray) flag?", "answer": "Stop carrying out your intentions and watch for my signals." },
+        { "question": "What is the meaning of the 'Y' (Yankee) flag?", "answer": "I am dragging my anchor." },
+        { "question": "What is the meaning of the 'Z' (Zulu) flag?", "answer": "I require a tug." }
+    ],
+
+    "Common Nautical Terms": [
+        { "question": "What does 'Port' refer to on a ship?", "answer": "The left side of the ship when facing forward." },
+        { "question": "What does 'Starboard' refer to on a ship?", "answer": "The right side of the ship when facing forward." },
+        { "question": "What is the 'Bow' of a ship?", "answer": "The front part of the ship." },
+        { "question": "What is the 'Stern' of a ship?", "answer": "The rear part of the ship." },
+        { "question": "What does 'Aft' mean?", "answer": "Towards the rear (stern) of the ship." },
+        { "question": "What does 'Forward' mean?", "answer": "Towards the front (bow) of the ship." }
     ]
 
 }

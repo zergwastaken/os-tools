@@ -1,37 +1,48 @@
 [
     {
-        "name": "US Navy Ship Parts",
-        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/USS_Gettysburg_%28CG-64%29_underway_in_the_Atlantic_Ocean_on_22_April_2010_%28100422-N-7058E-457%29.jpg/1200px-USS_Gettysburg_%28CG-64%29_underway_in_the_Atlantic_Ocean_on_22_April_2010_%28100422-N-7058E-457%29.jpg",
+        "name": "Middle East AORs",
+        "initialCenter": [25.0, 55.0],
+        "initialZoom": 5,
         "points": [
-            {"x": 15, "y": 30, "label": "Bow"},
-            {"x": 85, "y": 35, "label": "Stern"},
-            {"x": 40, "y": 25, "label": "Bridge"},
-            {"x": 50, "y": 40, "label": "Midship"},
-            {"x": 30, "y": 50, "label": "Port Side"},
-            {"x": 70, "y": 50, "label": "Starboard Side"}
+            {"lat": 26.2235, "lng": 50.5876, "label": "5th Fleet HQ - Bahrain"},
+            {"lat": 25.2854, "lng": 51.5310, "label": "Al Udeid Air Base - Qatar"},
+            {"lat": 26.5667, "lng": 56.3667, "label": "Strait of Hormuz"}
         ],
         "isDefault": true
     },
     {
-        "name": "World Oceans",
-        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Equirectangular_projection_SW.jpg/1200px-Equirectangular_projection_SW.jpg",
+        "name": "San Diego AOR",
+        "initialCenter": [32.7157, -117.1611],
+        "initialZoom": 10,
         "points": [
-            {"x": 50, "y": 70, "label": "Pacific Ocean"},
-            {"x": 50, "y": 35, "label": "Atlantic Ocean"},
-            {"x": 75, "y": 55, "label": "Indian Ocean"},
-            {"x": 50, "y": 10, "label": "Arctic Ocean"},
-            {"x": 50, "y": 90, "label": "Southern Ocean"}
+            {"lat": 32.6906, "lng": -117.1202, "label": "Naval Base San Diego"},
+            {"lat": 32.6739, "lng": -117.1431, "label": "Naval Base Point Loma"},
+            {"lat": 32.8153, "lng": -117.1350, "label": "MCAS Miramar"},
+            {"lat": 32.6968, "lng": -117.2148, "label": "Naval Base Coronado"}
         ],
         "isDefault": true
     },
     {
-        "name": "Navigation Chart Symbols",
-        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Nautical_chart_symbols.svg/800px-Nautical_chart_symbols.svg.png",
+        "name": "Pacific Fleet AORs",
+        "initialCenter": [20.0, 160.0],
+        "initialZoom": 3,
         "points": [
-            {"x": 20, "y": 30, "label": "Buoy"},
-            {"x": 50, "y": 40, "label": "Lighthouse"},
-            {"x": 70, "y": 50, "label": "Anchorage"},
-            {"x": 40, "y": 60, "label": "Wreck"}
+            {"lat": 21.3099, "lng": -157.8581, "label": "Pearl Harbor - Hawaii"},
+            {"lat": 35.3494, "lng": 139.4044, "label": "Yokosuka - Japan"},
+            {"lat": 1.3521, "lng": 103.8198, "label": "Changi Naval Base - Singapore"},
+            {"lat": 13.4443, "lng": 144.7937, "label": "Guam"}
+        ],
+        "isDefault": true
+    },
+    {
+        "name": "European Theater",
+        "initialCenter": [50.0, 10.0],
+        "initialZoom": 4,
+        "points": [
+            {"lat": 41.1257, "lng": 1.2513, "label": "Rota Naval Station - Spain"},
+            {"lat": 43.5895, "lng": 7.1124, "label": "6th Fleet - Mediterranean"},
+            {"lat": 59.3293, "lng": 18.0686, "label": "Baltic Sea"},
+            {"lat": 64.1466, "lng": -21.9426, "label": "Iceland - GIUK Gap"}
         ],
         "isDefault": true
     }

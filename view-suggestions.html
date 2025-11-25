@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Suggestions</title>
+    <link rel="icon" type="image/x-icon" href="images/logo.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .suggestions-container {
+            max-width: 1000px;
+            margin: 120px auto 40px auto;
+            padding: 40px;
+        }
+
+        .suggestions-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .suggestions-header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #3a7afe 0%, #7bb6ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .suggestions-count {
+            font-size: 1.2rem;
+            color: #b3c6ff;
+        }
+
+        .suggestion-card {
+            background: rgba(35, 40, 58, 0.8);
+            border: 2px solid rgba(58, 122, 254, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .suggestion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .suggestion-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #3a7afe;
+        }
+
+        .suggestion-date {
+            font-size: 0.9rem;
+            color: #7bb6ff;
+        }
+
+        .suggestion-text {
+            font-size: 1rem;
+            color: #fff;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .no-suggestions {
+            text-align: center;
+            padding: 60px 20px;
+            color: #b3c6ff;
+            font-size: 1.2rem;
+        }
+
+        .actions-bar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .export-btn, .clear-btn {
+            background: linear-gradient(135deg, #3a7afe 0%, #1e2a4a 100%);
+            color: #fff;
+            border: 2px solid rgba(58, 122, 254, 0.4);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 8px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #d32f2f 0%, #7a0000 100%);
+            border-color: rgba(211, 47, 47, 0.4);
+        }
+
+        .export-btn:hover, .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(58, 122, 254, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+
+    <div class="suggestions-container">
+        <div class="suggestions-header">
+            <h1>💡 User Suggestions</h1>
+            <p class="suggestions-count" id="suggestionsCount">Loading...</p>
+        </div>
+
+        <div class="actions-bar">
+            <button class="export-btn" onclick="exportSuggestionsJSON()">💾 Save Data (JSON)</button>
+            <button class="export-btn" onclick="exportSuggestions()">📥 Export to Text</button>
+            <label for="importFile" class="export-btn" style="cursor: pointer; display: inline-block;">
+                📂 Load Data
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importSuggestions(event)">
+            </label>
+            <button class="clear-btn" onclick="clearSuggestions()">🗑️ Clear All</button>
+        </div>
+
+        <div id="suggestionsList"></div>
+    </div>
+
+    <script src="timer-bar.js" defer></script>
+    <script>
+        fetch('header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+
+        function loadSuggestions() {
+            let suggestions = [];
+            try {
+                const stored = localStorage.getItem('userSuggestions');
+                if (stored) suggestions = JSON.parse(stored);
+            } catch (e) {
+                suggestions = [];
+            }
+
+            const container = document.getElementById('suggestionsList');
+            const countEl = document.getElementById('suggestionsCount');
+
+            if (suggestions.length === 0) {
+                container.innerHTML = '<div class="no-suggestions">No suggestions yet. Check back later!</div>';
+                countEl.textContent = 'No suggestions submitted';
+                return;
+            }
+
+            countEl.textContent = `${suggestions.length} suggestion${suggestions.length !== 1 ? 's' : ''} submitted`;
+
+            // Sort by newest first
+            suggestions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            container.innerHTML = suggestions.map(s => `
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <span class="suggestion-name">👤 ${s.name}</span>
+                        <span class="suggestion-date">📅 ${s.date}</span>
+                    </div>
+                    <div class="suggestion-text">${s.text}</div>
+                </div>
+            `).join('');
+        }
+
+        function exportSuggestions() {
+            let suggestions = [];
+            try {
+                const stored = localStorage.getItem('userSuggestions');
+                if (stored) suggestions = JSON.parse(stored);
+            } catch (e) {
+                suggestions = [];
+            }
+
+            if (suggestions.length === 0) {
+                alert('No suggestions to export!');
+                return;
+            }
+
+            let text = 'USER SUGGESTIONS\n';
+            text += '='.repeat(50) + '\n\n';
+
+            suggestions.forEach((s, i) => {
+                text += `Suggestion #${i + 1}\n`;
+                text += `Name: ${s.name}\n`;
+                text += `Date: ${s.date}\n`;
+                text += `Message:\n${s.text}\n`;
+                text += '\n' + '-'.repeat(50) + '\n\n';
+            });
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `suggestions_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearSuggestions() {
+            if (!confirm('Are you sure you want to delete all suggestions? This cannot be undone!')) {
+                return;
+            }
+            localStorage.removeItem('userSuggestions');
+            loadSuggestions();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSuggestions);
+    </script>
+</body>
+</html>
