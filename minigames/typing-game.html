@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Test - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 800px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        #textDisplay {
+            background: rgba(35, 40, 58, 0.8);
+            border: 2px solid rgba(58, 122, 254, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin: 30px 0;
+            min-height: 150px;
+            text-align: left;
+        }
+
+        .correct {
+            color: #4caf50;
+        }
+
+        .incorrect {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.2);
+        }
+
+        .current {
+            background: rgba(58, 122, 254, 0.3);
+        }
+
+        #typingInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: rgba(20, 25, 40, 0.9);
+            border: 2px solid #3a7afe;
+            border-radius: 12px;
+            color: #fff;
+            margin: 20px 0;
+        }
+
+        #typingInput:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(58, 122, 254, 0.5);
+        }
+
+        .game-info {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>⌨️ Typing Speed Test</h1>
+        <p style="text-align: center; color: #b3c6ff;">Type the text below as fast and accurately as you can!</p>
+        
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">WPM</div>
+                    <div class="info-value" id="wpm">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Accuracy</div>
+                    <div class="info-value" id="accuracy">100%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Time</div>
+                    <div class="info-value" id="time">0s</div>
+                </div>
+            </div>
+
+            <div id="textDisplay"></div>
+            <input type="text" id="typingInput" placeholder="Click here and start typing..." disabled>
+
+            <div class="game-controls">
+                <button class="main-btn" id="startBtn">Start Test</button>
+                <button class="main-btn" id="resetBtn" style="background: #ffb13a;">Reset</button>
+                <a href="../mini-games.html" class="main-btn">← Back to Games</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        const texts = [
+            "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.",
+            "Programming is the art of telling another human what one wants the computer to do.",
+            "In the beginning the Universe was created. This has made a lot of people very angry.",
+            "To be or not to be, that is the question. Whether 'tis nobler in the mind to suffer.",
+            "Life is what happens when you're busy making other plans. Time flies like an arrow.",
+            "The only way to do great work is to love what you do. Stay hungry, stay foolish.",
+            "Success is not final, failure is not fatal. It is the courage to continue that counts."
+        ];
+
+        let currentText = '';
+        let currentIndex = 0;
+        let startTime;
+        let timerInterval;
+        let correctChars = 0;
+        let incorrectChars = 0;
+        let isTyping = false;
+
+        const textDisplay = document.getElementById('textDisplay');
+        const typingInput = document.getElementById('typingInput');
+
+        function startTest() {
+            currentText = texts[Math.floor(Math.random() * texts.length)];
+            currentIndex = 0;
+            correctChars = 0;
+            incorrectChars = 0;
+            isTyping = true;
+            startTime = Date.now();
+
+            typingInput.value = '';
+            typingInput.disabled = false;
+            typingInput.focus();
+
+            displayText();
+
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('time').textContent = elapsed + 's';
+                calculateWPM();
+            }, 100);
+        }
+
+        function displayText() {
+            let html = '';
+            for (let i = 0; i < currentText.length; i++) {
+                if (i < currentIndex) {
+                    const char = typingInput.value[i];
+                    if (char === currentText[i]) {
+                        html += `<span class="correct">${currentText[i]}</span>`;
+                    } else {
+                        html += `<span class="incorrect">${currentText[i]}</span>`;
+                    }
+                } else if (i === currentIndex) {
+                    html += `<span class="current">${currentText[i]}</span>`;
+                } else {
+                    html += currentText[i];
+                }
+            }
+            textDisplay.innerHTML = html;
+        }
+
+        function calculateWPM() {
+            const elapsed = (Date.now() - startTime) / 1000 / 60;
+            const words = correctChars / 5;
+            const wpm = Math.round(words / elapsed);
+            document.getElementById('wpm').textContent = wpm;
+
+            const total = correctChars + incorrectChars;
+            const accuracy = total > 0 ? Math.round((correctChars / total) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function endTest() {
+            isTyping = false;
+            clearInterval(timerInterval);
+            typingInput.disabled = true;
+            calculateWPM();
+            
+            const wpm = document.getElementById('wpm').textContent;
+            const accuracy = document.getElementById('accuracy').textContent;
+            alert(`Test Complete!\nWPM: ${wpm}\nAccuracy: ${accuracy}`);
+        }
+
+        typingInput.addEventListener('input', (e) => {
+            if (!isTyping) return;
+
+            const typed = e.target.value;
+            currentIndex = typed.length;
+
+            for (let i = 0; i < typed.length; i++) {
+                if (i < currentText.length) {
+                    if (typed[i] === currentText[i]) {
+                        if (i === typed.length - 1) correctChars++;
+                    } else {
+                        if (i === typed.length - 1) incorrectChars++;
+                    }
+                }
+            }
+
+            displayText();
+
+            if (typed.length >= currentText.length) {
+                endTest();
+            }
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startTest);
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            clearInterval(timerInterval);
+            isTyping = false;
+            typingInput.value = '';
+            typingInput.disabled = true;
+            textDisplay.innerHTML = 'Click "Start Test" to begin';
+            document.getElementById('wpm').textContent = '0';
+            document.getElementById('accuracy').textContent = '100%';
+            document.getElementById('time').textContent = '0s';
+            correctChars = 0;
+            incorrectChars = 0;
+        });
+
+        textDisplay.innerHTML = 'Click "Start Test" to begin';
+    </script>
+</body>
+</html>

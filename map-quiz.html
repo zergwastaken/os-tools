@@ -79,6 +79,20 @@
         .leaflet-tooltip-top::before {
             border-top-color: rgba(35, 40, 58, 0.95);
         }
+        .quiz-input-tooltip {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            pointer-events: auto !important;
+        }
+        .quiz-input-tooltip::before {
+            display: none;
+        }
+        .quiz-marker-input {
+            pointer-events: auto !important;
+            cursor: text !important;
+        }
         /* Hide Leaflet attribution */
         .leaflet-control-attribution {
             display: none !important;
@@ -180,11 +194,9 @@
 
         <!-- Quiz controls -->
         <div id="quiz-controls" style="display:none; margin-top:20px;">
-            <div id="current-question" style="font-size:1.3rem; font-weight:600; margin-bottom:15px;"></div>
-            <input type="text" id="answer-input" placeholder="Enter your answer" style="width:90%; max-width:400px; margin-bottom:15px; padding:12px; font-size:1.1rem;">
+            <div id="current-question" style="font-size:1.3rem; font-weight:600; margin-bottom:15px;">Fill in the labels on the map above, then click Check Answers</div>
             <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
-                <button id="submit-answer-btn" class="main-btn" style="padding:12px 32px;">Submit Answer</button>
-                <button id="skip-btn" class="main-btn" style="padding:12px 32px; background:#ffb13a;">Skip</button>
+                <button id="check-answers-btn" class="main-btn" style="padding:12px 32px;">Check Answers</button>
                 <button id="end-quiz-btn" class="main-btn" style="padding:12px 32px; background:#d32f2f;">End Quiz</button>
             </div>
             <div id="feedback-msg" style="margin-top:20px; font-size:1.2rem; font-weight:600;"></div>
@@ -376,8 +388,28 @@
                     marker.bindTooltip(point.label, {
                         permanent: true,
                         direction: 'top',
-                        offset: [0, -12],
+                        offset: [0, -20],
                         className: 'custom-tooltip'
+                    });
+                }
+                
+                // Show input in quiz mode
+                if (quizMode) {
+                    const inputHtml = `<input type="text" class="quiz-marker-input" data-index="${idx}" placeholder="Enter name..." style="width:150px; padding:6px 8px; border:2px solid #3a7afe; border-radius:6px; background:#1e2a4a; color:#fff; font-size:0.9rem; text-align:center;">`;
+                    const tooltip = marker.bindTooltip(inputHtml, {
+                        permanent: true,
+                        direction: 'top',
+                        offset: [0, -20],
+                        className: 'custom-tooltip quiz-input-tooltip',
+                        interactive: true
+                    });
+                    
+                    // Enable interaction with the tooltip
+                    marker.on('tooltipopen', function() {
+                        const tooltipEl = document.querySelector('.quiz-input-tooltip');
+                        if (tooltipEl) {
+                            tooltipEl.style.pointerEvents = 'auto';
+                        }
                     });
                 }
                 
@@ -405,135 +437,64 @@
                 return;
             }
             
-            currentQuestionIndex = 0;
             score = 0;
-            answeredQuestions = [];
-            
-            // Shuffle questions
-            const shuffled = [...currentMap.points].sort(() => Math.random() - 0.5);
-            currentMap.quizOrder = shuffled;
             
             $('#quiz-controls').show();
             $('#quiz-results').hide();
-            showNextQuestion();
-        }
-        
-        // Show next question
-        function showNextQuestion() {
-            if (currentQuestionIndex >= currentMap.quizOrder.length) {
-                endQuiz();
-                return;
-            }
-            
-            const point = currentMap.quizOrder[currentQuestionIndex];
-            $('#current-question').text(`Question ${currentQuestionIndex + 1} of ${currentMap.quizOrder.length}: What is marked at this location?`);
-            $('#answer-input').val('').focus();
             $('#feedback-msg').empty();
-            
-            // Highlight current pin
-            highlightPin(point);
+            renderWorldMapMarkers();
         }
         
-        // Highlight specific pin
-        function highlightPin(point) {
-            if (!leafletMap) return;
+        // Check all answers
+        function checkAnswers() {
+            let correct = 0;
+            let total = currentMap.points.length;
+            const results = [];
             
-            // Clear existing markers
-            markers.forEach(m => leafletMap.removeLayer(m));
-            markers = [];
-            
-            let targetMarkerAdded = false;
-            
-            currentMap.points.forEach((p) => {
-                // Use label as unique identifier since it's more reliable
-                const isTarget = (p.label === point.label);
-                
-                // Keep same size for all markers, just change color
-                const icon = L.divIcon({
-                    className: isTarget ? 'custom-marker highlight' : 'custom-marker',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-                
-                const marker = L.marker([p.lat, p.lng], { icon: icon });
-                marker.addTo(leafletMap);
-                markers.push(marker);
-                
-                if (isTarget && !targetMarkerAdded) {
-                    targetMarkerAdded = true;
-                    // Pan to highlighted marker, keeping initial zoom
-                    const targetZoom = currentMap.initialZoom || 5;
-                    setTimeout(() => {
-                        leafletMap.setView([p.lat, p.lng], targetZoom, {
-                            animate: true,
-                            duration: 0.5
-                        });
-                    }, 100);
+            currentMap.points.forEach((point, idx) => {
+                const input = document.querySelector(`.quiz-marker-input[data-index="${idx}"]`);
+                if (input) {
+                    const userAnswer = input.value.trim();
+                    const correctAnswer = point.label;
+                    const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+                    
+                    if (isCorrect) {
+                        correct++;
+                        input.style.borderColor = '#4caf50';
+                        input.style.background = 'rgba(76, 175, 80, 0.2)';
+                    } else {
+                        input.style.borderColor = '#ff2222';
+                        input.style.background = 'rgba(255, 34, 34, 0.2)';
+                        input.value = `${userAnswer} ✗ (${correctAnswer})`;
+                    }
                 }
             });
-        }
-        
-        // Submit answer
-        function submitAnswer() {
-            const userAnswer = $('#answer-input').val().trim();
-            if (!userAnswer) {
-                $('#feedback-msg').html('<span style="color:#ffb13a;">Please enter an answer!</span>');
-                return;
-            }
             
-            const correctAnswer = currentMap.quizOrder[currentQuestionIndex].label;
-            const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            score = correct;
+            const percentage = Math.round((correct / total) * 100);
             
-            if (isCorrect) {
-                score++;
-                $('#feedback-msg').html('<span style="color:#4caf50;">✓ Correct!</span>');
-            } else {
-                $('#feedback-msg').html(`<span style="color:#ff2222;">✗ Wrong! The correct answer is: ${correctAnswer}</span>`);
-            }
-            
-            answeredQuestions.push({
-                question: correctAnswer,
-                userAnswer: userAnswer,
-                correct: isCorrect
-            });
-            
-            setTimeout(() => {
-                currentQuestionIndex++;
-                showNextQuestion();
-            }, 2000);
-        }
-        
-        // Skip question
-        function skipQuestion() {
-            const correctAnswer = currentMap.quizOrder[currentQuestionIndex].label;
-            answeredQuestions.push({
-                question: correctAnswer,
-                userAnswer: '(skipped)',
-                correct: false
-            });
-            
-            currentQuestionIndex++;
-            showNextQuestion();
+            $('#feedback-msg').html(`
+                <div style="background:rgba(35, 40, 58, 0.9); padding:20px; border-radius:12px; border:2px solid #3a7afe;">
+                    <div style="font-size:1.5rem; color:#3a7afe; margin-bottom:10px;">Score: ${correct}/${total} (${percentage}%)</div>
+                    <div style="font-size:1.1rem; color:${percentage >= 70 ? '#4caf50' : '#ffb13a'}">
+                        ${percentage >= 90 ? '🏆 Excellent!' : percentage >= 70 ? '👍 Good job!' : '📚 Keep practicing!'}
+                    </div>
+                </div>
+            `);
         }
         
         // End quiz
         function endQuiz() {
+            quizMode = false;
             $('#quiz-controls').hide();
-            $('#quiz-results').show();
+            $('#quiz-mode-selector').show();
+            $('#map-selection').show();
             
-            const percentage = Math.round((score / currentMap.quizOrder.length) * 100);
-            $('#score-display').html(`
-                <p>You scored <strong style="color:#3a7afe;">${score}</strong> out of <strong>${currentMap.quizOrder.length}</strong> (${percentage}%)</p>
-                <div style="text-align:left; max-width:400px; margin:20px auto;">
-                    ${answeredQuestions.map((q, idx) => `
-                        <div style="margin-bottom:10px; padding:8px; background:#23283a; border-radius:6px;">
-                            <strong>${idx + 1}. ${q.question}</strong><br>
-                            Your answer: <span style="color:${q.correct ? '#4caf50' : '#ff2222'}">${q.userAnswer}</span>
-                            ${q.correct ? '✓' : '✗'}
-                        </div>
-                    `).join('')}
-                </div>
-            `);
+            // Switch back to practice mode
+            $('#quiz-mode-btn').removeClass('active');
+            $('#practice-mode-btn').addClass('active');
+            
+            renderWorldMapMarkers();
         }
         
         // Edit mode functions
@@ -699,8 +660,7 @@
         $('#save-map-btn').on('click', saveMap);
         $('#cancel-edit-btn').on('click', exitEditMode);
         
-        $('#submit-answer-btn').on('click', submitAnswer);
-        $('#skip-btn').on('click', skipQuestion);
+        $('#check-answers-btn').on('click', checkAnswers);
         $('#end-quiz-btn').on('click', function() {
             if (confirm('Are you sure you want to end the quiz?')) {
                 endQuiz();
@@ -709,12 +669,6 @@
         
         $('#retake-quiz-btn').on('click', function() {
             startQuiz();
-        });
-        
-        $('#answer-input').on('keypress', function(e) {
-            if (e.which === 13) {
-                submitAnswer();
-            }
         });
         
         // Add pulse animation for highlighted pins

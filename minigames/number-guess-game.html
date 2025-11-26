@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guesser - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .game-container {
+            background: rgba(35, 40, 58, 0.8);
+            border: 2px solid rgba(58, 122, 254, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 30px 0;
+        }
+
+        #guessInput {
+            width: 100%;
+            max-width: 300px;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            background: rgba(20, 25, 40, 0.9);
+            border: 2px solid #3a7afe;
+            border-radius: 12px;
+            color: #fff;
+            margin: 20px 0;
+        }
+
+        #guessInput:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(58, 122, 254, 0.5);
+        }
+
+        #hint {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3a7afe;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .guess-history {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .guess-item {
+            padding: 8px 16px;
+            background: rgba(58, 122, 254, 0.2);
+            border: 1px solid rgba(58, 122, 254, 0.4);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>🔢 Number Guesser</h1>
+        <p style="text-align: center; color: #b3c6ff;">Guess the number between 1 and 100!</p>
+        
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Attempts</div>
+                    <div class="info-value" id="attempts">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Best Score</div>
+                    <div class="info-value" id="bestScore">-</div>
+                </div>
+            </div>
+
+            <div class="game-container">
+                <div id="hint">I'm thinking of a number...</div>
+                <input type="number" id="guessInput" min="1" max="100" placeholder="Enter your guess">
+                <div class="guess-history" id="guessHistory"></div>
+            </div>
+
+            <div class="game-controls">
+                <button class="main-btn" id="guessBtn">Submit Guess</button>
+                <button class="main-btn" id="newGameBtn" style="background: #ffb13a;">New Game</button>
+                <a href="../mini-games.html" class="main-btn">← Back to Games</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        let targetNumber;
+        let attempts = 0;
+        let bestScore = localStorage.getItem('numberGuessBest') || null;
+        const guesses = [];
+
+        if (bestScore) {
+            document.getElementById('bestScore').textContent = bestScore;
+        }
+
+        function newGame() {
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            guesses.length = 0;
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('hint').textContent = "I'm thinking of a number...";
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessHistory').innerHTML = '';
+        }
+
+        function makeGuess() {
+            const input = document.getElementById('guessInput');
+            const guess = parseInt(input.value);
+
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                document.getElementById('hint').textContent = '⚠️ Enter a number between 1-100!';
+                return;
+            }
+
+            attempts++;
+            guesses.push(guess);
+            document.getElementById('attempts').textContent = attempts;
+
+            const historyItem = document.createElement('div');
+            historyItem.className = 'guess-item';
+
+            if (guess === targetNumber) {
+                document.getElementById('hint').textContent = `🎉 Correct! You got it in ${attempts} attempts!`;
+                historyItem.textContent = `${guess} ✓`;
+                historyItem.style.background = 'rgba(76, 175, 80, 0.3)';
+                historyItem.style.borderColor = '#4caf50';
+
+                if (!bestScore || attempts < bestScore) {
+                    bestScore = attempts;
+                    localStorage.setItem('numberGuessBest', bestScore);
+                    document.getElementById('bestScore').textContent = bestScore;
+                }
+            } else if (guess < targetNumber) {
+                document.getElementById('hint').textContent = '📈 Too low! Go higher!';
+                historyItem.textContent = `${guess} ↑`;
+            } else {
+                document.getElementById('hint').textContent = '📉 Too high! Go lower!';
+                historyItem.textContent = `${guess} ↓`;
+            }
+
+            document.getElementById('guessHistory').appendChild(historyItem);
+            input.value = '';
+            input.focus();
+        }
+
+        document.getElementById('guessBtn').addEventListener('click', makeGuess);
+        document.getElementById('newGameBtn').addEventListener('click', newGame);
+        document.getElementById('guessInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') makeGuess();
+        });
+
+        // Start new game on load
+        newGame();
+    </script>
+</body>
+</html>

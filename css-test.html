@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Test - Dropdown Styles</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .test-section {
+            background: rgba(35, 40, 58, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .test-section h2 {
+            color: #3a7afe;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .test-section p {
+            color: #b8bfcc;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        /* Style 1: Classic Glassmorphic */
+        .style-1 select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(35, 40, 58, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(58, 122, 254, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .style-1 select:hover {
+            background: rgba(45, 50, 68, 0.9);
+            border-color: rgba(58, 122, 254, 0.5);
+            box-shadow: 0 0 20px rgba(58, 122, 254, 0.2);
+        }
+
+        .style-1 select:focus {
+            outline: none;
+            border-color: #3a7afe;
+            box-shadow: 0 0 30px rgba(58, 122, 254, 0.4);
+        }
+
+        .style-1 select option {
+            background: #1a1d2e;
+            color: #fff;
+            padding: 12px;
+        }
+
+        .style-1 select option:hover,
+        .style-1 select option:checked {
+            background: linear-gradient(135deg, #3a7afe, #5a9aff);
+            color: #fff;
+        }
+
+        /* Style 2: Modern Gradient Border */
+        .style-2 select {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(35, 40, 58, 0.95), rgba(45, 50, 68, 0.95));
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .style-2 .select-wrapper {
+            position: relative;
+            background: linear-gradient(135deg, #3a7afe, #7b2ff7);
+            padding: 2px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .style-2 .select-wrapper:hover {
+            background: linear-gradient(135deg, #5a9aff, #9b4fff);
+            box-shadow: 0 0 25px rgba(58, 122, 254, 0.4);
+        }
+
+        .style-2 select option {
+            background: #1a1d2e;
+            color: #fff;
+            padding: 12px;
+        }
+
+        .style-2 select option:hover,
+        .style-2 select option:checked {
+            background: linear-gradient(135deg, #3a7afe, #7b2ff7);
+            color: #fff;
+        }
+
+        /* Style 3: Neon Glow */
+        .style-3 select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(20, 25, 40, 0.9);
+            border: 2px solid #3a7afe;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(58, 122, 254, 0.3),
+                        inset 0 0 10px rgba(58, 122, 254, 0.1);
+            animation: pulseGlow 0.6s ease-out;
+        }
+
+        .style-3 select:hover {
+            border-color: #5a9aff;
+            box-shadow: 0 0 20px rgba(58, 122, 254, 0.6),
+                        inset 0 0 15px rgba(58, 122, 254, 0.2);
+        }
+
+        .style-3 select:focus {
+            outline: none;
+            box-shadow: 0 0 30px rgba(58, 122, 254, 0.8),
+                        inset 0 0 20px rgba(58, 122, 254, 0.3);
+        }
+
+        .style-3 select option {
+            background: #0a0e1a;
+            color: #fff;
+            padding: 12px;
+        }
+
+        .style-3 select option:checked {
+            background: linear-gradient(90deg, #3a7afe, #5a9aff);
+        }
+
+        /* Style 4: Minimal Clean */
+        .style-4 select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(35, 40, 58, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .style-4 select:hover {
+            background: rgba(45, 50, 68, 0.7);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .style-4 select:focus {
+            outline: none;
+            border-color: #3a7afe;
+            background: rgba(45, 50, 68, 0.8);
+        }
+
+        .style-4 select option {
+            background: #23283a;
+            color: #fff;
+            padding: 12px;
+        }
+
+        .style-4 select option:hover,
+        .style-4 select option:checked {
+            background: rgba(58, 122, 254, 0.3);
+            color: #fff;
+        }
+
+        /* Style 5: Bold Solid */
+        .style-5 select {
+            width: 100%;
+            padding: 14px 18px;
+            background: #3a7afe;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        .style-5 select:hover {
+            background: #5a9aff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(58, 122, 254, 0.4);
+        }
+
+        .style-5 select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(58, 122, 254, 0.3);
+        }
+
+        .style-5 select option {
+            background: #1a1d2e;
+            color: #fff;
+            padding: 12px;
+            font-weight: 400;
+        }
+
+        .style-5 select option:hover,
+        .style-5 select option:checked {
+            background: #3a7afe;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Style 6: Outlined Minimal */
+        .style-6 select {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: 2px solid rgba(58, 122, 254, 0.5);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        .style-6 select:hover {
+            background: rgba(58, 122, 254, 0.1);
+            border-color: #3a7afe;
+        }
+
+        .style-6 select:focus {
+            outline: none;
+            background: rgba(58, 122, 254, 0.15);
+            border-color: #5a9aff;
+        }
+
+        .style-6 select option {
+            background: #1a1d2e;
+            color: #fff;
+            padding: 12px;
+        }
+
+        .style-6 select option:hover,
+        .style-6 select option:checked {
+            background: rgba(58, 122, 254, 0.2);
+            color: #5a9aff;
+        }
+
+        /* Style 7: Soft Shadow */
+        .style-7 select {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(45, 50, 68, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .style-7 select:hover {
+            background: rgba(55, 60, 78, 0.8);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .style-7 select:focus {
+            outline: none;
+            border-color: rgba(58, 122, 254, 0.6);
+            box-shadow: 0 12px 40px rgba(58, 122, 254, 0.2);
+        }
+
+        .style-7 select option {
+            background: #1a1d2e;
+            color: #fff;
+            padding: 12px;
+        }
+
+        .style-7 select option:hover,
+        .style-7 select option:checked {
+            background: linear-gradient(135deg, #2d3250, #3a7afe);
+            color: #fff;
+        }
+
+        /* Style 8: Cyberpunk */
+        .style-8 select {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #1a1d2e, #23283a);
+            border: 2px solid #00ff88;
+            border-radius: 4px;
+            color: #00ff88;
+            font-size: 1rem;
+            font-family: monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            animation: glitchIn 0.6s ease-out;
+        }
+
+        .style-8 select:hover {
+            border-color: #00ffaa;
+            color: #00ffaa;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .style-8 select:focus {
+            outline: none;
+            box-shadow: 0 0 35px rgba(0, 255, 136, 0.6);
+        }
+
+        .style-8 select option {
+            background: #0a0e1a;
+            color: #00ff88;
+            padding: 12px;
+        }
+
+        .style-8 select option:hover,
+        .style-8 select option:checked {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ffaa;
+            box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                opacity: 0;
+                box-shadow: 0 0 0 rgba(58, 122, 254, 0);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(58, 122, 254, 0.6),
+                            inset 0 0 20px rgba(58, 122, 254, 0.3);
+            }
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(58, 122, 254, 0.3),
+                            inset 0 0 10px rgba(58, 122, 254, 0.1);
+            }
+        }
+
+        @keyframes glitchIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-5px);
+                text-shadow: 2px 0 #ff0000, -2px 0 #00ff00;
+            }
+            20% {
+                opacity: 0.8;
+                transform: translateX(5px);
+            }
+            40% {
+                transform: translateX(-2px);
+            }
+            60% {
+                transform: translateX(2px);
+            }
+            80% {
+                opacity: 1;
+                transform: translateX(-1px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+                text-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <div class="test-container">
+        <h1 style="color: #3a7afe; text-align: center; margin-bottom: 40px; font-size: 2.5rem;">Dropdown Style Testing</h1>
+
+        <div class="test-section style-1">
+            <h2>Style 1: Classic Glassmorphic</h2>
+            <p>Subtle backdrop blur with blue border glow on hover. Clean and modern.</p>
+            <select>
+                <option value="">🎨 Select your favorite style...</option>
+                <option value="1">⭐ Premium Design - Most Popular</option>
+                <option value="2">🚀 High Performance Mode</option>
+                <option value="3">🎯 Precision Interface</option>
+                <option value="4">💎 Luxury Edition</option>
+                <option value="5">⚡ Ultra Fast Response</option>
+            </select>
+        </div>
+
+        <div class="test-section style-2">
+            <h2>Style 2: Modern Gradient Border</h2>
+            <p>Gradient border effect with smooth color transitions. Eye-catching and premium.</p>
+            <div class="select-wrapper">
+                <select>
+                    <option value="">🌈 Choose your theme...</option>
+                    <option value="1">🔥 Fire Gradient - Bold & Bright</option>
+                    <option value="2">🌊 Ocean Wave - Cool & Calm</option>
+                    <option value="3">🌸 Sakura Blossom - Soft & Elegant</option>
+                    <option value="4">🌌 Galaxy - Deep & Mysterious</option>
+                    <option value="5">☀️ Sunset - Warm & Inviting</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="test-section style-3">
+            <h2>Style 3: Neon Glow</h2>
+            <p>Bold neon border with intense glow effects. High contrast and striking.</p>
+            <select>
+                <option value="">⚡ Power up your selection...</option>
+                <option value="1">💠 Neon Blue - Electric Energy</option>
+                <option value="2">💜 Purple Haze - Vibrant Vibes</option>
+                <option value="3">💚 Green Pulse - Tech Matrix</option>
+                <option value="4">🔴 Red Alert - High Intensity</option>
+                <option value="5">💛 Gold Rush - Premium Glow</option>
+            </select>
+        </div>
+
+        <div class="test-section style-4">
+            <h2>Style 4: Minimal Clean</h2>
+            <p>Understated and professional. Focuses on content over effects.</p>
+            <select>
+                <option value="">📋 Choose your preference...</option>
+                <option value="1">✓ Standard Layout - Recommended</option>
+                <option value="2">✓ Compact View - Space Efficient</option>
+                <option value="3">✓ Expanded Mode - Full Details</option>
+                <option value="4">✓ Grid Display - Visual Layout</option>
+                <option value="5">✓ List Format - Traditional</option>
+            </select>
+        </div>
+
+        <div class="test-section style-5">
+            <h2>Style 5: Bold Solid</h2>
+            <p>Strong blue background with prominent hover effects. Makes a statement.</p>
+            <select>
+                <option value="">🎯 Make your choice...</option>
+                <option value="1">🏆 Champion Mode - Best Performance</option>
+                <option value="2">👑 Royal Package - Premium Features</option>
+                <option value="3">🎖️ Elite Tier - Advanced Options</option>
+                <option value="4">💪 Power User - Maximum Control</option>
+                <option value="5">🌟 All-Star Bundle - Everything Included</option>
+            </select>
+        </div>
+
+        <div class="test-section style-6">
+            <h2>Style 6: Outlined Minimal</h2>
+            <p>Transparent background with outlined border. Subtle and elegant.</p>
+            <select>
+                <option value="">🎨 Pick your aesthetic...</option>
+                <option value="1">🤍 Pure White - Minimalist Beauty</option>
+                <option value="2">🖤 Midnight Black - Sleek & Modern</option>
+                <option value="3">💙 Ocean Blue - Calm & Peaceful</option>
+                <option value="4">💚 Forest Green - Natural & Fresh</option>
+                <option value="5">🤎 Warm Brown - Cozy & Comfortable</option>
+            </select>
+        </div>
+
+        <div class="test-section style-7">
+            <h2>Style 7: Soft Shadow</h2>
+            <p>Deep shadows with rounded corners. Elevated and smooth.</p>
+            <select>
+                <option value="">☁️ Select your ambiance...</option>
+                <option value="1">🌙 Moonlight - Soft & Gentle</option>
+                <option value="2">🌅 Dawn - Fresh Start</option>
+                <option value="3">🌆 Dusk - Peaceful Evening</option>
+                <option value="4">🌃 Starlight - Dreamy Night</option>
+                <option value="5">🌄 Sunrise - New Beginnings</option>
+            </select>
+        </div>
+
+        <div class="test-section style-8">
+            <h2>Style 8: Cyberpunk</h2>
+            <p>Green neon with monospace font. Futuristic tech aesthetic.</p>
+            <select>
+                <option value="">🔋 INITIALIZE SYSTEM...</option>
+                <option value="1">🤖 NEURAL_INTERFACE - AI Enhanced</option>
+                <option value="2">💻 CYBER_MATRIX - Grid Protocol</option>
+                <option value="3">🔒 SECURITY_MODE - Encrypted Data</option>
+                <option value="4">⚡ OVERCLOCK - Maximum Speed</option>
+                <option value="5">🌐 NET_RUNNER - Global Access</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+            });
+    </script>
+</body>
+</html>

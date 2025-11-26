@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia Quiz - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 800px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .question-container {
+            background: rgba(35, 40, 58, 0.8);
+            border: 2px solid rgba(58, 122, 254, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 30px 0;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            background: rgba(58, 122, 254, 0.2);
+            border: 2px solid rgba(58, 122, 254, 0.4);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .answer-btn:hover {
+            background: rgba(58, 122, 254, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(58, 122, 254, 0.3);
+        }
+
+        .answer-btn.correct {
+            background: rgba(76, 175, 80, 0.4);
+            border-color: #4caf50;
+        }
+
+        .answer-btn.incorrect {
+            background: rgba(244, 67, 54, 0.4);
+            border-color: #f44336;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>🧩 Trivia Quiz</h1>
+        <p style="text-align: center; color: #b3c6ff;">Test your knowledge!</p>
+        
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Question</div>
+                    <div class="info-value" id="questionNum">0/10</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Score</div>
+                    <div class="info-value" id="score">0</div>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-text" id="questionText">Click Start Quiz to begin!</div>
+                <div class="answers-grid" id="answersGrid"></div>
+            </div>
+
+            <div class="game-controls">
+                <button class="main-btn" id="startBtn">Start Quiz</button>
+                <button class="main-btn" id="nextBtn" style="background: #4caf50; display: none;">Next Question</button>
+                <a href="../mini-games.html" class="main-btn">← Back to Games</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                answers: ["London", "Berlin", "Paris", "Madrid"],
+                correct: 2
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                answers: ["Venus", "Mars", "Jupiter", "Saturn"],
+                correct: 1
+            },
+            {
+                question: "What is the largest ocean on Earth?",
+                answers: ["Atlantic", "Indian", "Arctic", "Pacific"],
+                correct: 3
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                answers: ["Van Gogh", "Picasso", "Da Vinci", "Monet"],
+                correct: 2
+            },
+            {
+                question: "What is the smallest country in the world?",
+                answers: ["Monaco", "Vatican City", "San Marino", "Liechtenstein"],
+                correct: 1
+            },
+            {
+                question: "What year did World War II end?",
+                answers: ["1943", "1944", "1945", "1946"],
+                correct: 2
+            },
+            {
+                question: "What is the largest mammal in the world?",
+                answers: ["African Elephant", "Blue Whale", "Giraffe", "Polar Bear"],
+                correct: 1
+            },
+            {
+                question: "Which element has the chemical symbol 'Au'?",
+                answers: ["Silver", "Gold", "Aluminum", "Argon"],
+                correct: 1
+            },
+            {
+                question: "How many continents are there?",
+                answers: ["5", "6", "7", "8"],
+                correct: 2
+            },
+            {
+                question: "What is the speed of light?",
+                answers: ["299,792 km/s", "150,000 km/s", "400,000 km/s", "200,000 km/s"],
+                correct: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let quizActive = false;
+
+        function startQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            quizActive = true;
+            document.getElementById('score').textContent = score;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestion >= questions.length) {
+                endQuiz();
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            document.getElementById('questionNum').textContent = `${currentQuestion + 1}/${questions.length}`;
+            document.getElementById('questionText').textContent = q.question;
+
+            const answersGrid = document.getElementById('answersGrid');
+            answersGrid.innerHTML = '';
+
+            q.answers.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.addEventListener('click', () => checkAnswer(index));
+                answersGrid.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const q = questions[currentQuestion];
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach((btn, index) => {
+                btn.style.pointerEvents = 'none';
+                if (index === q.correct) {
+                    btn.classList.add('correct');
+                }
+                if (index === selected && selected !== q.correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (selected === q.correct) {
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            document.getElementById('nextBtn').style.display = 'none';
+            showQuestion();
+        }
+
+        function endQuiz() {
+            quizActive = false;
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('questionText').textContent = 
+                `Quiz Complete! You scored ${score}/${questions.length} (${percentage}%)`;
+            document.getElementById('answersGrid').innerHTML = '';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('startBtn').textContent = 'Play Again';
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startQuiz);
+        document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+    </script>
+</body>
+</html>

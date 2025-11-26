@@ -13,85 +13,177 @@
         <h1>Mini Games</h1>
         <p style="text-align: center; margin-bottom: 30px; color: #b3c6ff;">Take a break with these quick games!</p>
         
-        <div class="games-grid">
+        <div class="games-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto;">
             <!-- Snake Game -->
-            <div class="game-card">
-                <h2>Snake</h2>
-                <div class="game-container">
-                    <canvas id="snakeCanvas" width="300" height="300"></canvas>
-                    <div class="game-score">Score: <span id="snakeScore">0</span></div>
-                    <button class="game-btn" id="snakeStart">Start Game</button>
+            <a href="minigames/snake-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🐍</div>
+                    <h2>Snake</h2>
+                    <p>Classic snake game - eat food and grow!</p>
                 </div>
-            </div>
+            </a>
 
             <!-- Memory Match Game -->
-            <div class="game-card">
-                <h2>Memory Match</h2>
-                <div class="game-container">
-                    <div id="memoryGrid" class="memory-grid"></div>
-                    <div class="game-score">Moves: <span id="memoryMoves">0</span> | Pairs: <span id="memoryPairs">0</span>/8</div>
-                    <button class="game-btn" id="memoryStart">New Game</button>
+            <a href="minigames/memory-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🧠</div>
+                    <h2>Memory Match</h2>
+                    <p>Match pairs of cards to win</p>
                 </div>
-            </div>
+            </a>
 
             <!-- Reaction Time Game -->
-            <div class="game-card">
-                <h2>Reaction Test</h2>
-                <div class="game-container">
-                    <div id="reactionBox" class="reaction-box">Click to Start</div>
-                    <div class="game-score">Best: <span id="reactionBest">-</span> ms</div>
-                    <button class="game-btn" id="reactionReset">Reset</button>
+            <a href="minigames/reaction-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">⚡</div>
+                    <h2>Reaction Test</h2>
+                    <p>Test how fast your reflexes are</p>
                 </div>
-            </div>
+            </a>
 
             <!-- Number Guess Game -->
-            <div class="game-card">
-                <h2>Number Guesser</h2>
-                <div class="game-container">
-                    <p id="guessHint">Guess a number between 1-100</p>
-                    <input type="number" id="guessInput" min="1" max="100" placeholder="Enter guess">
-                    <div class="game-score">Attempts: <span id="guessAttempts">0</span></div>
-                    <button class="game-btn" id="guessSubmit">Guess</button>
-                    <button class="game-btn" id="guessNew">New Game</button>
+            <a href="minigames/number-guess-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🔢</div>
+                    <h2>Number Guesser</h2>
+                    <p>Guess the secret number from 1-100</p>
                 </div>
-            </div>
+            </a>
 
             <!-- Whack-a-Mole Game -->
-            <div class="game-card">
-                <h2>Whack-a-Mole</h2>
-                <div class="game-container">
-                    <div id="moleGrid" class="mole-grid">
-                        <div class="mole-hole" data-index="0"></div>
-                        <div class="mole-hole" data-index="1"></div>
-                        <div class="mole-hole" data-index="2"></div>
-                        <div class="mole-hole" data-index="3"></div>
-                        <div class="mole-hole" data-index="4"></div>
-                        <div class="mole-hole" data-index="5"></div>
-                        <div class="mole-hole" data-index="6"></div>
-                        <div class="mole-hole" data-index="7"></div>
-                        <div class="mole-hole" data-index="8"></div>
-                    </div>
-                    <div class="game-score">Score: <span id="moleScore">0</span> | Time: <span id="moleTime">30</span>s</div>
-                    <button class="game-btn" id="moleStart">Start Game</button>
+            <a href="minigames/whack-a-mole-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🔨</div>
+                    <h2>Whack-a-Mole</h2>
+                    <p>Hit the moles before time runs out</p>
                 </div>
-            </div>
+            </a>
 
             <!-- Simon Says -->
-            <div class="game-card">
-                <h2>Simon Says</h2>
-                <div class="game-container">
-                    <div class="simon-grid">
-                        <div class="simon-btn simon-green" data-color="green"></div>
-                        <div class="simon-btn simon-red" data-color="red"></div>
-                        <div class="simon-btn simon-yellow" data-color="yellow"></div>
-                        <div class="simon-btn simon-blue" data-color="blue"></div>
-                    </div>
-                    <div class="game-score">Level: <span id="simonLevel">0</span></div>
-                    <button class="game-btn" id="simonStart">Start Game</button>
+            <a href="minigames/simon-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🎮</div>
+                    <h2>Simon Says</h2>
+                    <p>Remember and repeat the pattern</p>
                 </div>
-            </div>
+            </a>
+
+            <!-- Typing Speed Test -->
+            <a href="minigames/typing-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">⌨️</div>
+                    <h2>Typing Speed</h2>
+                    <p>Test your words per minute</p>
+                </div>
+            </a>
+
+            <!-- 2048 Game -->
+            <a href="minigames/2048-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🔲</div>
+                    <h2>2048</h2>
+                    <p>Combine tiles to reach 2048</p>
+                </div>
+            </a>
+
+            <!-- Tic Tac Toe -->
+            <a href="minigames/tictactoe-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">❌⭕</div>
+                    <h2>Tic Tac Toe</h2>
+                    <p>Play vs AI or friend</p>
+                </div>
+            </a>
+
+            <!-- Flappy Bird -->
+            <a href="minigames/flappybird-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🐦</div>
+                    <h2>Flappy Bird</h2>
+                    <p>Fly through the pipes without crashing</p>
+                </div>
+            </a>
+
+            <!-- Trivia Quiz -->
+            <a href="minigames/trivia-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🧩</div>
+                    <h2>Trivia Quiz</h2>
+                    <p>Test your general knowledge</p>
+                </div>
+            </a>
+
+            <!-- Color Match -->
+            <a href="minigames/color-match-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">🎨</div>
+                    <h2>Color Match</h2>
+                    <p>Match the color with the text</p>
+                </div>
+            </a>
+
+            <!-- Minesweeper -->
+            <a href="minigames/minesweeper-game.html" class="game-card-link">
+                <div class="game-card">
+                    <div class="game-icon">💣</div>
+                    <h2>Minesweeper</h2>
+                    <p>Classic mine finding puzzle</p>
+                </div>
+            </a>
         </div>
     </main>
+
+    <style>
+        .game-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .game-card-link:hover {
+            transform: translateY(-5px);
+        }
+
+        .game-card {
+            background: rgba(35, 40, 58, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(58, 122, 254, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-card:hover {
+            border-color: #3a7afe;
+            box-shadow: 0 8px 32px rgba(58, 122, 254, 0.4);
+            background: rgba(45, 50, 68, 0.9);
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .game-card h2 {
+            color: #3a7afe;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .game-card p {
+            color: #b3c6ff;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+    </style>
 
     <script src="timer-bar.js" defer></script>
     <script>

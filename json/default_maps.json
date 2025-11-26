@@ -13,7 +13,7 @@
     {
         "name": "San Diego AOR",
         "initialCenter": [32.7157, -117.1611],
-        "initialZoom": 10,
+        "initialZoom": 10,  
         "points": [
             {"lat": 32.6906, "lng": -117.1202, "label": "Naval Base San Diego"},
             {"lat": 32.6739, "lng": -117.1431, "label": "Naval Base Point Loma"},

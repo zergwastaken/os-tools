@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: rgba(35, 40, 58, 0.8);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 30px auto;
+            max-width: 450px;
+        }
+
+        .game-cell {
+            aspect-ratio: 1;
+            background: rgba(20, 25, 40, 0.9);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            transition: all 0.15s ease;
+        }
+
+        .game-cell[data-value="2"] { background: #eee4da; color: #776e65; }
+        .game-cell[data-value="4"] { background: #ede0c8; color: #776e65; }
+        .game-cell[data-value="8"] { background: #f2b179; color: #f9f6f2; }
+        .game-cell[data-value="16"] { background: #f59563; color: #f9f6f2; }
+        .game-cell[data-value="32"] { background: #f67c5f; color: #f9f6f2; }
+        .game-cell[data-value="64"] { background: #f65e3b; color: #f9f6f2; }
+        .game-cell[data-value="128"] { background: #edcf72; color: #f9f6f2; font-size: 1.8rem; }
+        .game-cell[data-value="256"] { background: #edcc61; color: #f9f6f2; font-size: 1.8rem; }
+        .game-cell[data-value="512"] { background: #edc850; color: #f9f6f2; font-size: 1.8rem; }
+        .game-cell[data-value="1024"] { background: #edc53f; color: #f9f6f2; font-size: 1.5rem; }
+        .game-cell[data-value="2048"] { background: #edc22e; color: #f9f6f2; font-size: 1.5rem; }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .hint-text {
+            color: #b3c6ff;
+            font-size: 0.95rem;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>🔲 2048</h1>
+        <p style="text-align: center; color: #b3c6ff;">Use arrow keys to move tiles. Combine matching numbers!</p>
+        
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Score</div>
+                    <div class="info-value" id="score">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Best</div>
+                    <div class="info-value" id="best">0</div>
+                </div>
+            </div>
+
+            <div class="game-grid" id="gameGrid"></div>
+
+            <p class="hint-text">Use ← ↑ → ↓ arrow keys to play</p>
+
+            <div class="game-controls">
+                <button class="main-btn" id="newGameBtn">New Game</button>
+                <a href="../mini-games.html" class="main-btn">← Back to Games</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        let grid = [];
+        let score = 0;
+        let best = localStorage.getItem('2048Best') || 0;
+        document.getElementById('best').textContent = best;
+
+        function initGame() {
+            grid = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
+            score = 0;
+            document.getElementById('score').textContent = score;
+            addRandomTile();
+            addRandomTile();
+            renderGrid();
+        }
+
+        function addRandomTile() {
+            const emptyCells = [];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (grid[i][j] === 0) emptyCells.push({i, j});
+                }
+            }
+            if (emptyCells.length > 0) {
+                const {i, j} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                grid[i][j] = Math.random() < 0.9 ? 2 : 4;
+            }
+        }
+
+        function renderGrid() {
+            const gridElement = document.getElementById('gameGrid');
+            gridElement.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'game-cell';
+                    const value = grid[i][j];
+                    if (value > 0) {
+                        cell.textContent = value;
+                        cell.dataset.value = value;
+                    }
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function move(direction) {
+            let moved = false;
+            const oldGrid = JSON.stringify(grid);
+
+            if (direction === 'left' || direction === 'right') {
+                for (let i = 0; i < 4; i++) {
+                    const row = direction === 'left' ? grid[i] : grid[i].reverse();
+                    const newRow = slide(row);
+                    if (direction === 'right') newRow.reverse();
+                    grid[i] = newRow;
+                }
+            } else {
+                for (let j = 0; j < 4; j++) {
+                    const col = direction === 'up' ? 
+                        [grid[0][j], grid[1][j], grid[2][j], grid[3][j]] :
+                        [grid[3][j], grid[2][j], grid[1][j], grid[0][j]];
+                    const newCol = slide(col);
+                    if (direction === 'down') newCol.reverse();
+                    for (let i = 0; i < 4; i++) {
+                        grid[i][j] = newCol[i];
+                    }
+                }
+            }
+
+            if (JSON.stringify(grid) !== oldGrid) {
+                moved = true;
+                addRandomTile();
+                renderGrid();
+                
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('2048Best', best);
+                    document.getElementById('best').textContent = best;
+                }
+
+                if (isGameOver()) {
+                    setTimeout(() => alert(`Game Over! Score: ${score}`), 300);
+                }
+            }
+        }
+
+        function slide(row) {
+            const arr = row.filter(val => val !== 0);
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] === arr[i + 1]) {
+                    arr[i] *= 2;
+                    score += arr[i];
+                    document.getElementById('score').textContent = score;
+                    arr[i + 1] = 0;
+                }
+            }
+            const newRow = arr.filter(val => val !== 0);
+            while (newRow.length < 4) newRow.push(0);
+            return newRow;
+        }
+
+        function isGameOver() {
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (grid[i][j] === 0) return false;
+                    if (j < 3 && grid[i][j] === grid[i][j + 1]) return false;
+                    if (i < 3 && grid[i][j] === grid[i + 1][j]) return false;
+                }
+            }
+            return true;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') move('left');
+            else if (e.key === 'ArrowRight') move('right');
+            else if (e.key === 'ArrowUp') { e.preventDefault(); move('up'); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); move('down'); }
+        });
+
+        document.getElementById('newGameBtn').addEventListener('click', initGame);
+
+        initGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px auto;
+            max-width: 450px;
+            background: rgba(35, 40, 58, 0.8);
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: rgba(20, 25, 40, 0.9);
+            border: 3px solid rgba(58, 122, 254, 0.3);
+            border-radius: 12px;
+            font-size: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cell:hover:not(.taken) {
+            background: rgba(58, 122, 254, 0.2);
+            transform: scale(1.05);
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: #3a7afe;
+        }
+
+        .cell.o {
+            color: #f44336;
+        }
+
+        .cell.winner {
+            background: rgba(76, 175, 80, 0.3);
+            animation: winPulse 0.5s ease-in-out;
+        }
+
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .game-info {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3a7afe;
+            margin: 20px 0;
+            min-height: 40px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>❌⭕ Tic Tac Toe</h1>
+        <p style="text-align: center; color: #b3c6ff;" id="subtitle">Select game mode to start!</p>
+        
+        <div class="game-wrapper">
+            <div class="mode-selector" id="modeSelector" style="display: flex; gap: 20px; justify-content: center; margin: 30px 0;">
+                <button class="main-btn" id="aiModeBtn" style="font-size: 1.1rem; padding: 15px 30px;">🤖 vs Computer</button>
+                <button class="main-btn" id="pvpModeBtn" style="font-size: 1.1rem; padding: 15px 30px; background: #4caf50;">👥 vs Player</button>
+            </div>
+
+            <div class="game-info" id="gameInfo" style="display: none;">Your Turn</div>
+
+            <div class="stats" style="display: none;">
+                <div class="info-item">
+                    <div class="info-label">Wins</div>
+                    <div class="info-value" id="wins">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Losses</div>
+                    <div class="info-value" id="losses">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Draws</div>
+                    <div class="info-value" id="draws">0</div>
+                </div>
+            </div>
+
+            <div class="game-board" id="gameBoard" style="display: none;"></div>
+
+            <div class="game-controls" style="display: none;">
+                <button class="main-btn" id="resetBtn">New Game</button>
+                <a href="../mini-games.html" class="main-btn">← Back to Games</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let wins = 0, losses = 0, draws = 0;
+        let gameMode = null; // 'ai' or 'pvp'
+
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function initBoard() {
+            const boardElement = document.getElementById('gameBoard');
+            boardElement.innerHTML = '';
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            document.getElementById('gameInfo').textContent = 'Your Turn';
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.addEventListener('click', handleCellClick);
+                boardElement.appendChild(cell);
+            }
+        }
+
+        function handleCellClick(e) {
+            const index = e.target.dataset.index;
+            if (!gameActive || board[index] !== '') return;
+
+            if (gameMode === 'ai') {
+                if (currentPlayer !== 'X') return;
+                makeMove(index, 'X');
+                if (gameActive) {
+                    setTimeout(computerMove, 500);
+                }
+            } else if (gameMode === 'pvp') {
+                makeMove(index, currentPlayer);
+            }
+        }
+
+        function makeMove(index, player) {
+            board[index] = player;
+            const cells = document.querySelectorAll('.cell');
+            cells[index].textContent = player;
+            cells[index].classList.add(player.toLowerCase(), 'taken');
+
+            checkGameEnd();
+        }
+
+        function computerMove() {
+            if (!gameActive) return;
+
+            const bestMove = getBestMove();
+            if (bestMove !== -1) {
+                makeMove(bestMove, 'O');
+            }
+        }
+
+        function getBestMove() {
+            // Try to win
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    if (checkWinner('O')) {
+                        board[i] = '';
+                        return i;
+                    }
+                    board[i] = '';
+                }
+            }
+
+            // Block player win
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    board[i] = 'X';
+                    if (checkWinner('X')) {
+                        board[i] = '';
+                        return i;
+                    }
+                    board[i] = '';
+                }
+            }
+
+            // Take center
+            if (board[4] === '') return 4;
+
+            // Take corners
+            const corners = [0, 2, 6, 8];
+            const availableCorners = corners.filter(i => board[i] === '');
+            if (availableCorners.length > 0) {
+                return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+            }
+
+            // Take any available
+            const available = board.map((val, idx) => val === '' ? idx : null).filter(val => val !== null);
+            return available.length > 0 ? available[0] : -1;
+        }
+
+        function checkWinner(player) {
+            return winPatterns.some(pattern => 
+                pattern.every(index => board[index] === player)
+            );
+        }
+
+        function checkGameEnd() {
+            const cells = document.querySelectorAll('.cell');
+
+            if (checkWinner('X')) {
+                gameActive = false;
+                wins++;
+                document.getElementById('wins').textContent = wins;
+                highlightWinner('X');
+                if (gameMode === 'ai') {
+                    document.getElementById('gameInfo').textContent = '🎉 You Win!';
+                } else {
+                    document.getElementById('gameInfo').textContent = '🎉 Player X Wins!';
+                }
+                return;
+            }
+
+            if (checkWinner('O')) {
+                gameActive = false;
+                losses++;
+                document.getElementById('losses').textContent = losses;
+                highlightWinner('O');
+                if (gameMode === 'ai') {
+                    document.getElementById('gameInfo').textContent = '😢 Computer Wins!';
+                } else {
+                    document.getElementById('gameInfo').textContent = '🎉 Player O Wins!';
+                }
+                return;
+            }
+
+            if (board.every(cell => cell !== '')) {
+                gameActive = false;
+                draws++;
+                document.getElementById('draws').textContent = draws;
+                document.getElementById('gameInfo').textContent = '🤝 Draw!';
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            if (gameMode === 'ai') {
+                document.getElementById('gameInfo').textContent = currentPlayer === 'X' ? 'Your Turn' : 'Computer Thinking...';
+            } else {
+                document.getElementById('gameInfo').textContent = `Player ${currentPlayer}'s Turn`;
+            }
+        }
+
+        function highlightWinner(player) {
+            const cells = document.querySelectorAll('.cell');
+            winPatterns.forEach(pattern => {
+                if (pattern.every(index => board[index] === player)) {
+                    pattern.forEach(index => cells[index].classList.add('winner'));
+                }
+            });
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', initBoard);
+
+        document.getElementById('aiModeBtn').addEventListener('click', () => {
+            gameMode = 'ai';
+            document.getElementById('subtitle').textContent = 'Beat the AI! You are X, Computer is O';
+            document.getElementById('modeSelector').style.display = 'none';
+            document.getElementById('gameInfo').style.display = 'block';
+            document.querySelector('.stats').style.display = 'flex';
+            document.getElementById('gameBoard').style.display = 'grid';
+            document.querySelector('.game-controls').style.display = 'flex';
+            initBoard();
+        });
+
+        document.getElementById('pvpModeBtn').addEventListener('click', () => {
+            gameMode = 'pvp';
+            document.getElementById('subtitle').textContent = 'Player vs Player - X goes first!';
+            document.getElementById('modeSelector').style.display = 'none';
+            document.getElementById('gameInfo').style.display = 'block';
+            document.querySelector('.stats').style.display = 'flex';
+            document.getElementById('gameBoard').style.display = 'grid';
+            document.querySelector('.game-controls').style.display = 'flex';
+            initBoard();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .mole-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px auto;
+            max-width: 500px;
+        }
+
+        .mole-hole {
+            aspect-ratio: 1;
+            background: radial-gradient(circle, #23283a 60%, #1a1d2e 100%);
+            border: 4px solid #3a7afe;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mole-hole::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background: #0a0e1a;
+            border-radius: 50%;
+        }
+
+        .mole {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            z-index: 10;
+            animation: popUp 0.3s ease-out;
+        }
+
+        @keyframes popUp {
+            from {
+                transform: translate(-50%, 100%);
+            }
+            to {
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .mole-hole.hit {
+            animation: hitFlash 0.3s ease;
+        }
+
+        @keyframes hitFlash {
+            0%, 100% { border-color: #3a7afe; }
+            50% { border-color: #4caf50; }
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>🔨 Whack-a-Mole</h1>
+        <p style="text-align: center; color: #b3c6ff;">Hit the moles as fast as you can!</p>
+        
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Score</div>
+                    <div class="info-value" id="score">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Time</div>
+                    <div class="info-value" id="time">30</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">High Score</div>
+                    <div class="info-value" id="highScore">0</div>
+                </div>
+            </div>
+
+            <div class="mole-grid" id="moleGrid">
+                <div class="mole-hole" data-index="0"></div>
+                <div class="mole-hole" data-index="1"></div>
+                <div class="mole-hole" data-index="2"></div>
+                <div class="mole-hole" data-index="3"></div>
+                <div class="mole-hole" data-index="4"></div>
+                <div class="mole-hole" data-index="5"></div>
+                <div class="mole-hole" data-index="6"></div>
+                <div class="mole-hole" data-index="7"></div>
+                <div class="mole-hole" data-index="8"></div>
+            </div>
+
+            <div class="game-controls">
+                <button class="main-btn" id="startBtn">Start Game</button>
+                <a href="../mini-games.html" class="main-btn">← Back to Games</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        const holes = document.querySelectorAll('.mole-hole');
+        let score = 0;
+        let timeLeft = 30;
+        let gameActive = false;
+        let moleInterval;
+        let countdownInterval;
+        let highScore = localStorage.getItem('whackHighScore') || 0;
+
+        document.getElementById('highScore').textContent = highScore;
+
+        function randomHole() {
+            const index = Math.floor(Math.random() * holes.length);
+            return holes[index];
+        }
+
+        function showMole() {
+            if (!gameActive) return;
+
+            const hole = randomHole();
+            const mole = document.createElement('div');
+            mole.className = 'mole';
+            mole.textContent = '🐹';
+            hole.appendChild(mole);
+
+            const duration = Math.random() * 500 + 500;
+
+            mole.addEventListener('click', () => {
+                if (!gameActive) return;
+                score++;
+                document.getElementById('score').textContent = score;
+                hole.classList.add('hit');
+                mole.remove();
+                setTimeout(() => hole.classList.remove('hit'), 300);
+            });
+
+            setTimeout(() => {
+                if (mole.parentNode) {
+                    mole.remove();
+                }
+            }, duration);
+        }
+
+        function startGame() {
+            if (gameActive) return;
+
+            gameActive = true;
+            score = 0;
+            timeLeft = 30;
+            document.getElementById('score').textContent = score;
+            document.getElementById('time').textContent = timeLeft;
+
+            // Clear all moles
+            holes.forEach(hole => {
+                const mole = hole.querySelector('.mole');
+                if (mole) mole.remove();
+            });
+
+            moleInterval = setInterval(showMole, 800);
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time').textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(moleInterval);
+            clearInterval(countdownInterval);
+
+            holes.forEach(hole => {
+                const mole = hole.querySelector('.mole');
+                if (mole) mole.remove();
+            });
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('whackHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+                alert(`New High Score! ${score} points!`);
+            } else {
+                alert(`Game Over! Score: ${score}`);
+            }
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+    </script>
+</body>
+</html>

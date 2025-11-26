@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Test - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        #reactionBox {
+            width: 100%;
+            height: 400px;
+            background: rgba(35, 40, 58, 0.8);
+            border: 3px solid rgba(58, 122, 254, 0.5);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px 0;
+        }
+
+        #reactionBox.waiting {
+            background: linear-gradient(135deg, #d32f2f, #f44336);
+            border-color: #d32f2f;
+            color: #fff;
+        }
+
+        #reactionBox.ready {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            border-color: #4caf50;
+            color: #fff;
+        }
+
+        #reactionBox.too-soon {
+            background: linear-gradient(135deg, #ff9800, #ffa726);
+            border-color: #ff9800;
+            color: #fff;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>⚡ Reaction Test</h1>
+        <p style="text-align: center; color: #b3c6ff;">Click when the box turns green!</p>
+        
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Last Time</div>
+                    <div class="info-value" id="lastTime">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Best Time</div>
+                    <div class="info-value" id="bestTime">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Average</div>
+                    <div class="info-value" id="avgTime">-</div>
+                </div>
+            </div>
+
+            <div id="reactionBox">Click to Start</div>
+
+            <a href="../mini-games.html" class="main-btn" style="margin-top: 20px;">← Back to Games</a>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        const box = document.getElementById('reactionBox');
+        let state = 'idle';
+        let startTime;
+        let timeout;
+        let times = [];
+        let bestTime = Infinity;
+
+        function updateStats(time) {
+            document.getElementById('lastTime').textContent = time + ' ms';
+            
+            if (time < bestTime) {
+                bestTime = time;
+                document.getElementById('bestTime').textContent = bestTime + ' ms';
+            }
+
+            times.push(time);
+            const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+            document.getElementById('avgTime').textContent = avg + ' ms';
+        }
+
+        box.addEventListener('click', () => {
+            if (state === 'idle') {
+                state = 'waiting';
+                box.className = 'waiting';
+                box.textContent = 'Wait for green...';
+                
+                const delay = Math.random() * 3000 + 2000;
+                timeout = setTimeout(() => {
+                    state = 'ready';
+                    box.className = 'ready';
+                    box.textContent = 'CLICK NOW!';
+                    startTime = Date.now();
+                }, delay);
+            } else if (state === 'waiting') {
+                clearTimeout(timeout);
+                state = 'too-soon';
+                box.className = 'too-soon';
+                box.textContent = 'Too soon! Click to try again';
+                setTimeout(() => {
+                    state = 'idle';
+                    box.className = '';
+                    box.textContent = 'Click to Start';
+                }, 2000);
+            } else if (state === 'ready') {
+                const reactionTime = Date.now() - startTime;
+                updateStats(reactionTime);
+                state = 'idle';
+                box.className = '';
+                box.textContent = `${reactionTime}ms - Click to try again`;
+                setTimeout(() => {
+                    box.textContent = 'Click to Start';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

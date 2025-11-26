@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simon Says - OS Tools</title>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .game-wrapper {
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .simon-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px auto;
+            max-width: 400px;
+        }
+
+        .simon-btn {
+            aspect-ratio: 1;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border: 4px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .simon-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .simon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .simon-green {
+            background: #4caf50;
+        }
+
+        .simon-green.active {
+            background: #81c784;
+            box-shadow: 0 0 40px #4caf50;
+        }
+
+        .simon-red {
+            background: #f44336;
+        }
+
+        .simon-red.active {
+            background: #e57373;
+            box-shadow: 0 0 40px #f44336;
+        }
+
+        .simon-yellow {
+            background: #ffeb3b;
+        }
+
+        .simon-yellow.active {
+            background: #fff176;
+            box-shadow: 0 0 40px #ffeb3b;
+        }
+
+        .simon-blue {
+            background: #2196f3;
+        }
+
+        .simon-blue.active {
+            background: #64b5f6;
+            box-shadow: 0 0 40px #2196f3;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            background: rgba(35, 40, 58, 0.8);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid rgba(58, 122, 254, 0.3);
+        }
+
+        .info-label {
+            color: #b3c6ff;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #3a7afe;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+    <main class="center-container glass-bg">
+        <h1>🎮 Simon Says</h1>
+        <p style="text-align: center; color: #b3c6ff;">Remember and repeat the pattern!</p>
+        
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Level</div>
+                    <div class="info-value" id="level">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">High Score</div>
+                    <div class="info-value" id="highScore">0</div>
+                </div>
+            </div>
+
+            <div class="simon-grid">
+                <div class="simon-btn simon-green" data-color="green"></div>
+                <div class="simon-btn simon-red" data-color="red"></div>
+                <div class="simon-btn simon-yellow" data-color="yellow"></div>
+                <div class="simon-btn simon-blue" data-color="blue"></div>
+            </div>
+
+            <div class="game-controls">
+                <button class="main-btn" id="startBtn">Start Game</button>
+                <a href="../mini-games.html" class="main-btn">← Back to Games</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="global-timer-bar"></div>
+    <script src="../timer-bar.js" defer></script>
+    <script>
+        fetch('../header.html')
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const header = doc.querySelector('header');
+                if (header) document.getElementById('header').appendChild(header);
+            });
+    </script>
+    <script>
+        const buttons = document.querySelectorAll('.simon-btn');
+        const sounds = {
+            green: 262,
+            red: 330,
+            yellow: 392,
+            blue: 494
+        };
+
+        let sequence = [];
+        let playerSequence = [];
+        let level = 0;
+        let gameActive = false;
+        let canClick = false;
+        let highScore = localStorage.getItem('simonHighScore') || 0;
+
+        document.getElementById('highScore').textContent = highScore;
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, duration = 300) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function flashButton(color) {
+            const btn = document.querySelector(`[data-color="${color}"]`);
+            btn.classList.add('active');
+            playSound(sounds[color]);
+            setTimeout(() => btn.classList.remove('active'), 300);
+        }
+
+        function playSequence() {
+            canClick = false;
+            let i = 0;
+            const interval = setInterval(() => {
+                flashButton(sequence[i]);
+                i++;
+                if (i >= sequence.length) {
+                    clearInterval(interval);
+                    canClick = true;
+                }
+            }, 600);
+        }
+
+        function nextRound() {
+            level++;
+            document.getElementById('level').textContent = level;
+            playerSequence = [];
+            const colors = ['green', 'red', 'yellow', 'blue'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            sequence.push(randomColor);
+            setTimeout(playSequence, 1000);
+        }
+
+        function checkSequence() {
+            const currentIndex = playerSequence.length - 1;
+            
+            if (playerSequence[currentIndex] !== sequence[currentIndex]) {
+                gameOver();
+                return;
+            }
+
+            if (playerSequence.length === sequence.length) {
+                canClick = false;
+                setTimeout(nextRound, 1000);
+            }
+        }
+
+        function gameOver() {
+            gameActive = false;
+            canClick = false;
+            
+            if (level > highScore) {
+                highScore = level;
+                localStorage.setItem('simonHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+                alert(`New High Score! Level ${level}!`);
+            } else {
+                alert(`Game Over! You reached level ${level}`);
+            }
+        }
+
+        function startGame() {
+            if (gameActive) return;
+            gameActive = true;
+            sequence = [];
+            playerSequence = [];
+            level = 0;
+            document.getElementById('level').textContent = level;
+            nextRound();
+        }
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!gameActive || !canClick) return;
+                
+                const color = btn.dataset.color;
+                flashButton(color);
+                playerSequence.push(color);
+                checkSequence();
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+    </script>
+</body>
+</html>

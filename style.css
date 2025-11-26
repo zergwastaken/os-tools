@@ -750,7 +750,6 @@ input[type="number"] {
 .preset-timers .preset-btn:hover {
     background: linear-gradient(135deg, #5a9aff 0%, #3a7afe 100%);
     border-color: #3a7afe;
-    transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(58, 122, 254, 0.4);
 }
 
